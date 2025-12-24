@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#f1f1f1;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif
+}
+.page{
+  max-width:480px;
+  margin:auto;
+  padding:16px
+}
+input,textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  background:#161616;
+  border:1px solid #222;
+  color:#fff;
+  border-radius:12px;
+  font-size:14px
+}
+textarea{resize:none}
+button{
+  width:100%;
+  padding:12px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  font-weight:600
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+  <h2>Admin Panel</h2>
+
+  <input id="id" placeholder="ID video (ep1)">
+  <input id="titleInput" placeholder="Judul video">
+  <input id="stream" placeholder="Link stream">
+  <input id="downloadInput" placeholder="Link download">
+
+  <button onclick="generate()">Generate</button>
+
+  <textarea id="json" rows="7" placeholder="JSON output"></textarea>
+  <textarea id="link" rows="2" placeholder="Link stream"></textarea>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
