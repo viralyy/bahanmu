@@ -18,10 +18,7 @@ body{
   margin:auto;
   padding:16px
 }
-h2{
-  margin-bottom:14px;
-  font-size:20px
-}
+h2{margin-bottom:14px;font-size:20px}
 input,textarea{
   width:100%;
   padding:12px;
@@ -60,13 +57,14 @@ button:active{opacity:.85}
   <input id="id" placeholder="ID video (contoh: ep1)">
   <input id="titleInput" placeholder="Judul video">
   <input id="stream" placeholder="Link stream">
-  <input id="downloadInput" placeholder="Link download (opsional)">
-  <input id="downloadInput" placeholder="Link download (opsional)">
+
+  <input id="download1" placeholder="Link download 1 (opsional)">
+  <input id="download2" placeholder="Link download 2 (opsional)">
 
   <button onclick="generate()">Generate</button>
 
   <div class="small">JSON (auto copy)</div>
-  <textarea id="json" rows="7" readonly></textarea>
+  <textarea id="json" rows="9" readonly></textarea>
 
   <div class="small">Link Stream</div>
   <textarea id="link" rows="2" readonly></textarea>
@@ -74,33 +72,45 @@ button:active{opacity:.85}
 
 <script>
 function generate(){
-  const id = document.getElementById('id').value.trim();
-  const title = document.getElementById('titleInput').value.trim();
-  const stream = document.getElementById('stream').value.trim();
-  const download = document.getElementById('downloadInput').value.trim();
+  const id = idEl.value.trim();
+  const title = titleInput.value.trim();
+  const stream = streamEl.value.trim();
+  const d1 = download1.value.trim();
+  const d2 = download2.value.trim();
 
   if(!id || !title || !stream){
     alert('Lengkapi ID, judul, dan link stream!');
     return;
   }
 
+  const downloads = [];
+  if(d1) downloads.push(d1);
+  if(d2) downloads.push(d2);
+  if(!downloads.length) downloads.push(stream);
+
   const data = {};
   data[id] = {
     title: title,
-    url: stream,
-    download: download || stream
+    src: stream,
+    downloads: downloads
   };
 
   const jsonText = JSON.stringify(data, null, 2);
-
-  document.getElementById('json').value = jsonText;
+  json.value = jsonText;
 
   const base = location.origin + location.pathname.replace('admin.html','');
-  document.getElementById('link').value = base + '?v=' + id;
+  link.value = base + '?v=' + id;
 
-  // auto copy JSON
   navigator.clipboard.writeText(jsonText).catch(()=>{});
 }
+
+const idEl = document.getElementById('id');
+const titleInput = document.getElementById('titleInput');
+const streamEl = document.getElementById('stream');
+const download1 = document.getElementById('download1');
+const download2 = document.getElementById('download2');
+const json = document.getElementById('json');
+const link = document.getElementById('link');
 </script>
 
 </body>
