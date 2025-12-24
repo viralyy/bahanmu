@@ -18,6 +18,10 @@ body{
   margin:auto;
   padding:16px
 }
+h2{
+  margin-bottom:14px;
+  font-size:20px
+}
 input,textarea{
   width:100%;
   padding:12px;
@@ -36,7 +40,14 @@ button{
   color:#fff;
   border:none;
   border-radius:14px;
-  font-weight:600
+  font-weight:600;
+  cursor:pointer
+}
+button:active{opacity:.85}
+.small{
+  font-size:12px;
+  color:#aaa;
+  margin-bottom:6px
 }
 </style>
 </head>
@@ -46,17 +57,50 @@ button{
 <div class="page">
   <h2>Admin Panel</h2>
 
-  <input id="id" placeholder="ID video (ep1)">
+  <input id="id" placeholder="ID video (contoh: ep1)">
   <input id="titleInput" placeholder="Judul video">
   <input id="stream" placeholder="Link stream">
-  <input id="downloadInput" placeholder="Link download">
+  <input id="downloadInput" placeholder="Link download (opsional)">
 
   <button onclick="generate()">Generate</button>
 
-  <textarea id="json" rows="7" placeholder="JSON output"></textarea>
-  <textarea id="link" rows="2" placeholder="Link stream"></textarea>
+  <div class="small">JSON (auto copy)</div>
+  <textarea id="json" rows="7" readonly></textarea>
+
+  <div class="small">Link Stream</div>
+  <textarea id="link" rows="2" readonly></textarea>
 </div>
 
-<script src="app.js"></script>
+<script>
+function generate(){
+  const id = document.getElementById('id').value.trim();
+  const title = document.getElementById('titleInput').value.trim();
+  const stream = document.getElementById('stream').value.trim();
+  const download = document.getElementById('downloadInput').value.trim();
+
+  if(!id || !title || !stream){
+    alert('Lengkapi ID, judul, dan link stream!');
+    return;
+  }
+
+  const data = {};
+  data[id] = {
+    title: title,
+    url: stream,
+    download: download || stream
+  };
+
+  const jsonText = JSON.stringify(data, null, 2);
+
+  document.getElementById('json').value = jsonText;
+
+  const base = location.origin + location.pathname.replace('admin.html','');
+  document.getElementById('link').value = base + '?v=' + id;
+
+  // auto copy JSON
+  navigator.clipboard.writeText(jsonText).catch(()=>{});
+}
+</script>
+
 </body>
 </html>
