@@ -1,6 +1,8 @@
+// =====================
 // STREAM
+// =====================
 if (document.getElementById("player")) {
-  fetch("videos.json")
+  fetch("videos.json?_=" + Date.now())
     .then(r => r.json())
     .then(data => {
       const id = new URLSearchParams(location.search).get("v");
@@ -14,14 +16,23 @@ if (document.getElementById("player")) {
       title.textContent = video.title;
       player.src = video.src;
 
-      // tombol download 1
-      if (video.downloads && video.downloads[0]) {
-        download.href = video.downloads[0];
+      // tombol download 1 & 2
+      if (video.downloads) {
+        if (video.downloads[0]) {
+          download1.href = video.downloads[0];
+        }
+        if (video.downloads[1]) {
+          download2.href = video.downloads[1];
+        }
       }
-    });
+    })
+    .catch(err => console.error("Video load error:", err));
 }
 
-// ADMIN (generator JSON baru)
+
+// =====================
+// ADMIN (generator JSON)
+// =====================
 function generate() {
   if (!document.getElementById("json")) return;
 
@@ -40,7 +51,10 @@ function generate() {
     [id]: {
       title: title,
       src: src,
-      downloads: [dl1 || src, dl2 || src]
+      downloads: [
+        dl1 || src,
+        dl2 || src
+      ]
     }
   };
 
