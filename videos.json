@@ -1,13 +1,10 @@
 {
-  "1": {
-    "title": "tes",
-    "url": "https://cdn.videy.co/AdTZN9co1.mp4",
-    "download": "https://cdn.videy.co/AdTZN9co1.mp4"
-  }
-  {
   "test": {
     "title": "test",
-    "url": "https://cdn.videy.co/AdTZN9co1.mp4",
-    "download": "https://cdn.videy.co/AdTZN9co1.mp4"
+    "src": "https://cdn.videy.co/AdTZN9co1.mp4",
+    "downloads": [
+      "https://cdn.videy.co/AdTZN9co1.mp4",
+      "https://cdn.videy.co/AdTZN9co1.mp4"
+    ]
   }
 }
