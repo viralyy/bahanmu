@@ -18,7 +18,7 @@ body{
   margin:auto;
   padding:16px
 }
-h2{margin-bottom:14px}
+h2{margin-bottom:12px}
 input,textarea{
   width:100%;
   padding:12px;
@@ -39,10 +39,7 @@ button{
   font-weight:600;
   cursor:pointer
 }
-.small-btn{
-  padding:8px;
-  font-size:13px
-}
+.small-btn{padding:8px;font-size:13px}
 .btn-gray{background:#333}
 .small{font-size:12px;color:#aaa;margin-bottom:6px}
 .card{
@@ -51,19 +48,8 @@ button{
   border-radius:14px;
   margin-bottom:10px
 }
-.row{
-  display:flex;
-  gap:6px
-}
+.row{display:flex;gap:6px}
 .row button{flex:1}
-.preview-btn{
-  background:#ff0055;
-  padding:10px;
-  border-radius:10px;
-  text-align:center;
-  margin-top:6px;
-  font-weight:600
-}
 .download-row{
   display:flex;
   gap:6px;
@@ -71,6 +57,14 @@ button{
 }
 .download-row input{flex:1}
 .download-row button{width:42px}
+.preview-btn{
+  background:#ff0055;
+  padding:10px;
+  border-radius:10px;
+  margin-top:6px;
+  text-align:center;
+  font-weight:600
+}
 </style>
 </head>
 
@@ -79,13 +73,13 @@ button{
 
 <h2>Admin Panel</h2>
 
-<input id="id" placeholder="ID video (ep1)">
+<input id="id" placeholder="ID video (contoh: 12)">
 <input id="titleInput" placeholder="Judul video">
 <input id="stream" placeholder="Link stream">
 
 <div class="small">Tombol Download</div>
 <div id="downloads"></div>
-<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol download</button>
+<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol</button>
 
 <br><br>
 <button onclick="generate()">Generate</button>
@@ -94,7 +88,7 @@ button{
 <div id="preview" class="card"></div>
 
 <div class="small">JSON Output</div>
-<textarea id="json" rows="8" readonly></textarea>
+<textarea id="json" rows="9" readonly></textarea>
 <button class="small-btn btn-gray" onclick="copyText('json')">📋 Salin JSON</button>
 
 <div class="small">Link Stream</div>
@@ -121,7 +115,7 @@ function addDownload(label='', url=''){
   `;
   $('downloads').appendChild(div);
 }
-addDownload(); // default 1
+addDownload();
 
 // ================= GENERATE =================
 function generate(){
@@ -135,7 +129,7 @@ function generate(){
   }
 
   const downloads = [];
-  document.querySelectorAll('#downloads .download-row').forEach(r=>{
+  document.querySelectorAll('.download-row').forEach(r=>{
     const label = r.children[0].value.trim();
     const url = r.children[1].value.trim();
     if(url){
@@ -151,11 +145,7 @@ function generate(){
   }
 
   const data = {
-    [id]: {
-      title,
-      src,
-      downloads
-    }
+    [id]: { title, src, downloads }
   };
 
   $('json').value = JSON.stringify(data, null, 2);
@@ -178,7 +168,7 @@ function generate(){
 // ================= PREVIEW =================
 function renderPreview(v){
   $('preview').innerHTML =
-    `<h4>${v.title}</h4>` +
+    `<b>${v.title}</b>` +
     v.downloads.map(d =>
       `<div class="preview-btn">${d.label}</div>`
     ).join('');
@@ -206,7 +196,7 @@ function renderHistory(){
         <b>${k}</b> — ${v.title}
         <div class="row">
           <button class="small-btn" onclick="editHistory(${i})">Edit</button>
-          <button class="small-btn" onclick='renderPreview(${JSON.stringify(v).replace(/"/g,"&quot;")})'>Preview</button>
+          <button class="small-btn btn-gray" onclick='renderPreview(${JSON.stringify(v).replace(/"/g,"&quot;")})'>Preview</button>
           <button class="small-btn btn-gray" onclick="del(${i})">Hapus</button>
         </div>
       </div>
