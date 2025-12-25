@@ -1,5 +1,5 @@
 // =====================
-// STREAM
+// STREAM PAGE
 // =====================
 if (document.getElementById("player")) {
   fetch("videos.json?_=" + Date.now())
@@ -10,32 +10,38 @@ if (document.getElementById("player")) {
 
       const video = data[id];
 
-      empty.style.display = "none";
-      watch.classList.remove("hidden");
+      // tampilkan video
+      document.getElementById("empty").style.display = "none";
+      document.getElementById("watch").classList.remove("hidden");
 
-      title.textContent = video.title;
-      player.src = video.src;
+      document.getElementById("title").textContent = video.title;
+      document.getElementById("player").src = video.src;
 
-      // tombol download 1 & 2
-      if (video.downloads) {
-        if (video.downloads[0]) {
-          download1.href = video.downloads[0];
-        }
-        if (video.downloads[1]) {
-          download2.href = video.downloads[1];
-        }
+      // tombol download 1
+      const dl1 = document.getElementById("download1");
+      if (video.downloads && video.downloads[0]) {
+        dl1.href = video.downloads[0];
+        dl1.style.display = "block";
+      } else {
+        dl1.style.display = "none";
+      }
+
+      // tombol download 2
+      const dl2 = document.getElementById("download2");
+      if (video.downloads && video.downloads[1]) {
+        dl2.href = video.downloads[1];
+        dl2.style.display = "block";
+      } else {
+        dl2.style.display = "none";
       }
     })
     .catch(err => console.error("Video load error:", err));
 }
 
-
 // =====================
-// ADMIN (generator JSON)
+// ADMIN PANEL
 // =====================
 function generate() {
-  if (!document.getElementById("json")) return;
-
   const id = document.getElementById("id").value.trim();
   const title = document.getElementById("titleInput").value.trim();
   const src = document.getElementById("stream").value.trim();
@@ -43,7 +49,7 @@ function generate() {
   const dl2 = document.getElementById("download2")?.value.trim() || "";
 
   if (!id || !title || !src) {
-    alert("Lengkapi data");
+    alert("Lengkapi ID, judul, dan link stream!");
     return;
   }
 
@@ -51,16 +57,19 @@ function generate() {
     [id]: {
       title: title,
       src: src,
-      downloads: [
-        dl1 || src,
-        dl2 || src
-      ]
+      downloads: [dl1 || src, dl2 || src]
     }
   };
 
-  document.getElementById("json").value =
-    JSON.stringify(json, null, 2);
+  const jsonText = JSON.stringify(json, null, 2);
 
+  // tampilkan di textarea
+  document.getElementById("json").value = jsonText;
+
+  // buat link langsung ke video
   document.getElementById("link").value =
-    `${location.origin}${location.pathname.replace("admin.html","")}?v=${id}`;
+    location.origin + location.pathname.replace("admin.html", "") + "?v=" + id;
+
+  // auto copy ke clipboard
+  navigator.clipboard.writeText(jsonText).catch(() => {});
 }
