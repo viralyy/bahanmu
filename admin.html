@@ -22,11 +22,11 @@ h2{margin-bottom:14px}
 input,textarea{
   width:100%;
   padding:12px;
-  margin-bottom:10px;
   background:#161616;
   border:1px solid #222;
   color:#fff;
-  border-radius:12px
+  border-radius:12px;
+  margin-bottom:8px
 }
 textarea{resize:none}
 button{
@@ -39,23 +39,20 @@ button{
   font-weight:600;
   cursor:pointer
 }
-button.small{
+.small-btn{
   padding:8px;
-  font-size:13px;
-  margin-top:6px
+  font-size:13px
 }
 .btn-gray{background:#333}
-.small{
-  font-size:12px;
-  color:#aaa;
-  margin-bottom:6px
-}
+.small{font-size:12px;color:#aaa;margin-bottom:6px}
 .card{
   background:#111;
   padding:12px;
   border-radius:14px;
   margin-bottom:10px
 }
+.row{display:flex;gap:6px}
+.row button{flex:1}
 .preview-btn{
   background:#ff0055;
   padding:10px;
@@ -64,11 +61,12 @@ button.small{
   margin-top:6px;
   font-weight:600
 }
-.row{
+.download-row{
   display:flex;
-  gap:6px
+  gap:6px;
+  margin-bottom:6px
 }
-.row button{flex:1}
+.download-row input{flex:1}
 </style>
 </head>
 
@@ -80,9 +78,12 @@ button.small{
 <input id="titleInput" placeholder="Judul video">
 <input id="stream" placeholder="Link stream">
 
-<input id="download1" placeholder="Judul tombol 1 | link">
-<input id="download2" placeholder="Judul tombol 2 | link">
+<div class="small">Download Buttons</div>
+<div id="downloads"></div>
 
+<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah Download</button>
+
+<br><br>
 <button onclick="generate()">Generate</button>
 
 <div class="small">Preview</div>
@@ -90,11 +91,11 @@ button.small{
 
 <div class="small">JSON Output</div>
 <textarea id="json" rows="8" readonly></textarea>
-<button class="small btn-gray" onclick="copyText('json')">📋 Salin JSON</button>
+<button class="small-btn btn-gray" onclick="copyText('json')">📋 Salin JSON</button>
 
 <div class="small">Link Stream</div>
 <textarea id="link" rows="2" readonly></textarea>
-<button class="small btn-gray" onclick="copyText('link')">📋 Salin Link</button>
+<button class="small-btn btn-gray" onclick="copyText('link')">📋 Salin Link</button>
 
 <h3 style="margin-top:20px">History</h3>
 <div id="history"></div>
@@ -104,104 +105,103 @@ button.small{
 const $ = id => document.getElementById(id);
 let editIndex = null;
 
-function generate(){
-  const id = $('id').value.trim();
-  const title = $('titleInput').value.trim();
-  const src = $('stream').value.trim();
-  const d1 = $('download1').value.trim();
-  const d2 = $('download2').value.trim();
+// ================= DOWNLOAD FIELD =================
+function addDownload(label='',url=''){
+  const div=document.createElement('div');
+  div.className='download-row';
+  div.innerHTML=`
+    <input placeholder="Judul | link" value="${label && url ? label+' | '+url : ''}">
+    <button class="small-btn btn-gray" onclick="this.parentNode.remove()">❌</button>
+  `;
+  $('downloads').appendChild(div);
+}
 
-  if(!id || !title || !src){
+addDownload(); // default 1
+
+// ================= GENERATE =================
+function generate(){
+  const id=$('id').value.trim();
+  const title=$('titleInput').value.trim();
+  const src=$('stream').value.trim();
+
+  if(!id||!title||!src){
     alert('Lengkapi data!');
     return;
   }
 
-  const downloads = [];
-  if(d1) downloads.push(parseDL(d1));
-  if(d2) downloads.push(parseDL(d2));
+  const downloads=[];
+  document.querySelectorAll('#downloads input').forEach(i=>{
+    if(i.value.trim()){
+      const [l,u]=i.value.split('|').map(v=>v.trim());
+      downloads.push({label:l||'Download',url:u||src});
+    }
+  });
   if(!downloads.length) downloads.push({label:'Download',url:src});
 
-  const data = {
-    [id]:{ title, src, downloads }
+  const data={
+    [id]:{title,src,downloads}
   };
 
-  $('json').value = JSON.stringify(data,null,2);
-  $('link').value = location.origin + location.pathname.replace('admin.html','') + '?v=' + id;
+  $('json').value=JSON.stringify(data,null,2);
+  $('link').value=location.origin+location.pathname.replace('admin.html','')+'?v='+id;
 
   renderPreview(data[id]);
 
-  let h = JSON.parse(localStorage.getItem('history')||'[]');
-  if(editIndex !== null){
-    h[editIndex] = data;
-    editIndex = null;
-  }else{
-    h.unshift(data);
-  }
+  let h=JSON.parse(localStorage.getItem('history')||'[]');
+  if(editIndex!==null){h[editIndex]=data;editIndex=null}
+  else h.unshift(data);
   localStorage.setItem('history',JSON.stringify(h.slice(0,10)));
   renderHistory();
 }
 
-function parseDL(str){
-  const [label,url] = str.split('|').map(v=>v.trim());
-  return {label:label||'Download',url:url||''};
+// ================= PREVIEW =================
+function renderPreview(v){
+  $('preview').innerHTML=
+    `<h4>${v.title}</h4>`+
+    v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
 }
 
-function renderPreview(video){
-  $('preview').innerHTML =
-    `<h4>${video.title}</h4>` +
-    video.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
-}
-
+// ================= COPY =================
 function copyText(id){
-  const el = $(id);
+  const el=$(id);
   if(!el.value) return alert('Kosong bre 🗿');
-  el.select();
-  el.setSelectionRange(0,99999);
-  navigator.clipboard.writeText(el.value);
+  el.select();navigator.clipboard.writeText(el.value);
   alert('Disalin ✅');
 }
 
 // ================= HISTORY =================
-
 function renderHistory(){
-  const h = JSON.parse(localStorage.getItem('history')||'[]');
-  $('history').innerHTML = '';
-
-  h.forEach((item,i)=>{
-    const key = Object.keys(item)[0];
-    const v = item[key];
-
-    $('history').innerHTML += `
+  const h=JSON.parse(localStorage.getItem('history')||'[]');
+  $('history').innerHTML='';
+  h.forEach((o,i)=>{
+    const k=Object.keys(o)[0],v=o[k];
+    $('history').innerHTML+=`
       <div class="card">
-        <b>${key}</b> — ${v.title}
+        <b>${k}</b> — ${v.title}
         <div class="row">
-          <button class="small" onclick='editHistory(${i})'>Edit</button>
-          <button class="small" onclick='renderPreview(${JSON.stringify(v).replace(/"/g,"&quot;")})'>Preview</button>
-          <button class="small btn-gray" onclick='removeHistory(${i})'>Hapus</button>
+          <button class="small-btn" onclick="editHistory(${i})">Edit</button>
+          <button class="small-btn" onclick='renderPreview(${JSON.stringify(v).replace(/"/g,"&quot;")})'>Preview</button>
+          <button class="small-btn btn-gray" onclick="del(${i})">Hapus</button>
         </div>
-      </div>
-    `;
+      </div>`;
   });
 }
 
 function editHistory(i){
-  const h = JSON.parse(localStorage.getItem('history'));
-  const item = h[i];
-  const key = Object.keys(item)[0];
-  const v = item[key];
+  const h=JSON.parse(localStorage.getItem('history'));
+  const o=h[i];const k=Object.keys(o)[0];const v=o[k];
 
-  $('id').value = key;
-  $('titleInput').value = v.title;
-  $('stream').value = v.src;
-  $('download1').value = v.downloads[0] ? `${v.downloads[0].label} | ${v.downloads[0].url}` : '';
-  $('download2').value = v.downloads[1] ? `${v.downloads[1].label} | ${v.downloads[1].url}` : '';
-
+  $('id').value=k;
+  $('titleInput').value=v.title;
+  $('stream').value=v.src;
+  $('downloads').innerHTML='';
+  v.downloads.forEach(d=>addDownload(d.label,d.url));
   renderPreview(v);
-  editIndex = i;
+  editIndex=i;
 }
 
-function removeHistory(i){
-  const h = JSON.parse(localStorage.getItem('history'));
+function del(i){
+  const h=JSON.parse(localStorage.getItem('history'));
   h.splice(i,1);
   localStorage.setItem('history',JSON.stringify(h));
   renderHistory();
