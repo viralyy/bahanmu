@@ -46,6 +46,22 @@ button:active{opacity:.85}
   color:#aaa;
   margin-bottom:6px
 }
+.download-item{
+  display:flex;
+  gap:6px;
+  margin-bottom:8px
+}
+.download-item input{
+  flex:1
+}
+.download-item button{
+  width:44px;
+  background:#222
+}
+.add-btn{
+  background:#222;
+  margin-bottom:14px
+}
 </style>
 </head>
 
@@ -58,35 +74,51 @@ button:active{opacity:.85}
   <input id="titleInput" placeholder="Judul video">
   <input id="stream" placeholder="Link stream">
 
-  <input id="download1" placeholder="Link download 1 (opsional)">
-  <input id="download2" placeholder="Link download 2 (opsional)">
+  <div class="small">Tombol Download</div>
+  <div id="downloads"></div>
+
+  <button class="add-btn" onclick="addDownload()">➕ Tambah tombol</button>
 
   <button onclick="generate()">Generate</button>
 
   <div class="small">JSON (auto copy)</div>
-  <textarea id="json" rows="9" readonly></textarea>
+  <textarea id="json" rows="10" readonly></textarea>
 
   <div class="small">Link Stream</div>
   <textarea id="link" rows="2" readonly></textarea>
 </div>
 
 <script>
+function addDownload(label='', url=''){
+  const wrap = document.createElement('div');
+  wrap.className = 'download-item';
+
+  wrap.innerHTML = `
+    <input placeholder="Judul tombol" value="${label}">
+    <input placeholder="Link download" value="${url}">
+    <button onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.getElementById('downloads').appendChild(wrap);
+}
+
 function generate(){
   const id = idEl.value.trim();
   const title = titleInput.value.trim();
   const stream = streamEl.value.trim();
-  const d1 = download1.value.trim();
-  const d2 = download2.value.trim();
 
   if(!id || !title || !stream){
-    alert('Lengkapi ID, judul, dan link stream!');
+    alert('Lengkapi ID, judul, dan stream!');
     return;
   }
 
   const downloads = [];
-  if(d1) downloads.push(d1);
-  if(d2) downloads.push(d2);
-  if(!downloads.length) downloads.push(stream);
+  document.querySelectorAll('.download-item').forEach(item=>{
+    const label = item.children[0].value.trim();
+    const url = item.children[1].value.trim();
+    if(label && url){
+      downloads.push({ label, url });
+    }
+  });
 
   const data = {};
   data[id] = {
@@ -104,11 +136,12 @@ function generate(){
   navigator.clipboard.writeText(jsonText).catch(()=>{});
 }
 
+// default 1 tombol
+addDownload();
+
 const idEl = document.getElementById('id');
 const titleInput = document.getElementById('titleInput');
 const streamEl = document.getElementById('stream');
-const download1 = document.getElementById('download1');
-const download2 = document.getElementById('download2');
 const json = document.getElementById('json');
 const link = document.getElementById('link');
 </script>
