@@ -29,7 +29,14 @@ video{
   width:100%;
   border-radius:14px;
   background:#000;
-  margin:12px 0
+  margin:12px 0;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s ease;
+}
+video.ready{
+  opacity:1;
+  transform:scale(1);
 }
 h2,h3{margin:8px 0;font-weight:600}
 p{color:#aaa;font-size:14px}
@@ -54,36 +61,12 @@ p{color:#aaa;font-size:14px}
   background:linear-gradient(135deg,#ffb800,#ff7a00);
 }
 
-.badge{
-  display:inline-block;
-  font-size:11px;
-  padding:4px 8px;
-  border-radius:99px;
-  background:#222;
-  margin-top:6px
-}
-
 .stats{
   display:flex;
   justify-content:space-between;
   font-size:12px;
   color:#aaa;
   margin:6px 0 10px
-}
-
-.fake-comments{
-  margin-top:16px;
-}
-.comment{
-  background:#111;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
-  font-size:13px
-}
-.comment span{
-  color:#ff3c7d;
-  font-weight:600
 }
 
 .progress{
@@ -101,11 +84,11 @@ p{color:#aaa;font-size:14px}
   background:#ff3c7d;
   animation:load 2s forwards
 }
-@keyframes load{
-  to{width:100%}
-}
+@keyframes load{to{width:100%}}
 
-/* watermark */
+.video-wrap{
+  position:relative
+}
 .watermark{
   position:absolute;
   bottom:16px;
@@ -113,8 +96,10 @@ p{color:#aaa;font-size:14px}
   opacity:.6;
   pointer-events:none
 }
-.video-wrap{
-  position:relative
+
+/* Cusdis */
+#cusdis_thread{
+  margin-top:24px;
 }
 </style>
 </head>
@@ -138,7 +123,6 @@ p{color:#aaa;font-size:14px}
   <div class="video-wrap">
     <video id="player" controls playsinline></video>
 
-    <!-- WATERMARK SVG -->
     <svg class="watermark" width="80" height="20" viewBox="0 0 120 30">
       <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
     </svg>
@@ -158,12 +142,10 @@ p{color:#aaa;font-size:14px}
     Share this page
   </a>
 
-  <!-- FAKE COMMENTS -->
-  <div class="fake-comments">
-    <h3>Komentar</h3>
-    <div class="comment"><span>Andi</span> : Mantap videonya 🔥</div>
-    <div class="comment"><span>Rizky</span> : Gak nyangka full versi</div>
-    <div class="comment"><span>Dewi</span> : Download lancar, makasih</div>
+  <!-- COMMENTS -->
+  <div id="cusdis_thread"
+    data-host="https://cusdis.com"
+    data-app-id="e3cf9f0a-935d-4c79-a04f-19d760d0e0fd">
   </div>
 
 </div>
@@ -171,34 +153,42 @@ p{color:#aaa;font-size:14px}
 <script src="app.js"></script>
 
 <script>
-/* fake views */
-let v = localStorage.getItem("views") || 120;
-v = parseInt(v) + Math.floor(Math.random()*5+1);
-localStorage.setItem("views", v);
-document.getElementById("views").textContent = "👁 " + v + " views";
+const id = new URLSearchParams(location.search).get("v") || "global";
 
-/* fake online */
-document.getElementById("online").textContent =
-  "● " + (Math.floor(Math.random()*40)+10) + " online";
+/* views (per video) */
+let views = localStorage.getItem("views_"+id);
+views = views ? parseInt(views)+1 : 1;
+localStorage.setItem("views_"+id, views);
+document.getElementById("views").textContent = "👁 " + views + " views";
+
+/* online fake realtime */
+setInterval(()=>{
+  document.getElementById("online").textContent =
+    "● " + (Math.floor(Math.random()*30)+10) + " online";
+},4000);
 
 /* share */
-document.getElementById("shareBtn").onclick = e => {
+document.getElementById("shareBtn").onclick = e=>{
   e.preventDefault();
   navigator.clipboard.writeText(location.href);
   alert("Link disalin!");
 };
 
-/* fake download progress */
-document.addEventListener("click", e => {
-  if (e.target.closest(".btn")) {
-    const p = document.getElementById("fakeProgress");
-    if (p) {
-      p.style.display = "block";
-      setTimeout(()=>p.style.display="none",2200);
-    }
-  }
+/* fake progress hanya tombol download */
+document.addEventListener("click",e=>{
+  const a = e.target.closest("#downloads a");
+  if(!a) return;
+  const p=document.getElementById("fakeProgress");
+  p.style.display="block";
+  setTimeout(()=>p.style.display="none",2200);
 });
+
+/* video ready animation */
+const v = document.getElementById("player");
+v.addEventListener("loadeddata",()=>v.classList.add("ready"));
 </script>
+
+<script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
 
 <iframe src="histats.html" style="display:none"></iframe>
 
