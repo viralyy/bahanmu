@@ -38,9 +38,8 @@ video.ready{
   opacity:1;
   transform:scale(1);
 }
-h2,h3{margin:8px 0;font-weight:600}
-p{color:#aaa;font-size:14px}
 .hidden{display:none}
+h3{margin:8px 0}
 
 .btn{
   display:flex;
@@ -57,40 +56,21 @@ p{color:#aaa;font-size:14px}
   font-weight:600
 }
 
-.btn.premium{
-  background:linear-gradient(135deg,#ffb800,#ff7a00);
-}
-
 .stats{
   display:flex;
   justify-content:space-between;
   font-size:12px;
   color:#aaa;
-  margin:6px 0 10px
+  margin-bottom:8px
 }
 
-.progress{
-  width:100%;
-  height:6px;
-  background:#222;
-  border-radius:99px;
-  overflow:hidden;
-  margin-top:8px;
-  display:none
+.video-wrap{
+  position:relative
 }
-.progress div{
-  height:100%;
-  width:0%;
-  background:#ff3c7d;
-  animation:load 2s forwards
-}
-@keyframes load{to{width:100%}}
-
-.video-wrap{position:relative}
 .watermark{
   position:absolute;
-  bottom:16px;
-  right:16px;
+  bottom:14px;
+  right:14px;
   opacity:.6;
   pointer-events:none
 }
@@ -99,13 +79,10 @@ p{color:#aaa;font-size:14px}
 
 <body>
 
-<!-- EMPTY -->
 <div class="page center" id="empty">
-  <h2>Video tidak tersedia</h2>
-  <p>Gunakan link stream yang valid</p>
+  <h3>Video tidak tersedia</h3>
 </div>
 
-<!-- PLAYER -->
 <div class="page hidden" id="watch">
 
   <h3 id="title"></h3>
@@ -117,82 +94,66 @@ p{color:#aaa;font-size:14px}
 
   <div class="video-wrap">
     <video id="player" controls playsinline></video>
-
-    <!-- WATERMARK -->
     <svg class="watermark" width="80" height="20" viewBox="0 0 120 30">
       <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
     </svg>
   </div>
 
-  <!-- DOWNLOAD BUTTONS -->
   <div id="downloads"></div>
-
-  <!-- FAKE PROGRESS -->
-  <div class="progress" id="fakeProgress">
-    <div></div>
-  </div>
-
-  <!-- SHARE -->
-  <a href="#" class="btn" id="shareBtn">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
-      <path d="M18 16a3 3 0 0 0-2.24 1.03L8.91 13.7a3.27 3.27 0 0 0 0-1.39l6.72-3.32A3 3 0 1 0 14 5a3 3 0 0 0 .24 1.17L7.52 9.49A3 3 0 1 0 6 15a3 3 0 0 0 1.52-.49l6.72 3.32A3 3 0 1 0 18 16z"/>
-    </svg>
-    Share this page
-  </a>
 
 </div>
 
-<!-- APP -->
 <script src="app.js"></script>
 
 <script>
+/* =========================
+   VIEW & ONLINE (local)
+========================= */
 const vid = new URLSearchParams(location.search).get("v") || "global";
 
-/* views per video */
 let views = localStorage.getItem("views_"+vid);
 views = views ? parseInt(views)+1 : 1;
 localStorage.setItem("views_"+vid, views);
-document.getElementById("views").textContent = "👁 " + views + " views";
+document.getElementById("views").textContent = "👁 "+views+" views";
 
-/* online random realtime */
 setInterval(()=>{
   document.getElementById("online").textContent =
-    "● " + (Math.floor(Math.random()*30)+10) + " online";
+    "● "+(Math.floor(Math.random()*25)+10)+" online";
 },4000);
 
-/* share */
-document.getElementById("shareBtn").onclick = e=>{
-  e.preventDefault();
-  navigator.clipboard.writeText(location.href);
-  alert("Link disalin!");
-};
-
-/* fake progress hanya klik download */
-document.addEventListener("click",e=>{
-  const a = e.target.closest("#downloads a");
-  if(!a) return;
-  const p=document.getElementById("fakeProgress");
-  p.style.display="block";
-  setTimeout(()=>p.style.display="none",2200);
-});
-
 /* video ready animation */
-const v=document.getElementById("player");
+const v = document.getElementById("player");
 v.addEventListener("loadeddata",()=>v.classList.add("ready"));
-</script>
 
-<iframe src="histats.html" style="display:none"></iframe>
+/* =========================
+   POPUNDER — SINGLE NETWORK
+========================= */
+let popFired = false;
 
-<!-- POPUNDER BARU (SATU AJA) -->
-<script>
-if(!localStorage.getItem("popunder_shown")){
-  localStorage.setItem("popunder_shown","1");
-  var s=document.createElement("script");
-  s.src="//aq.agriaonethe.com/r0CA7FIW9rI8qTQH/131146";
-  s.async=true;
-  s.setAttribute("data-cfasync","false");
-  document.body.appendChild(s);
+function firePop(){
+  if(popFired) return;
+  popFired = true;
+
+  let w = window.open("about:blank","_blank");
+  if(!w) return;
+
+  w.document.write(`
+    <html>
+    <head>
+      <meta name="referrer" content="no-referrer">
+      <script data-cfasync="false" async src="//aq.agriaonethe.com/r0CA7FIW9rI8qTQH/131146"><\/script>
+    </head>
+    <body></body>
+    </html>
+  `);
+  w.document.close();
 }
+
+/* trigger */
+document.addEventListener("click",e=>{
+  if(e.target.closest("#downloads a")) firePop();
+});
+v.addEventListener("play",firePop);
 </script>
 
 </body>
