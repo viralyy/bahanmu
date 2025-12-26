@@ -13,11 +13,7 @@ body{
   color:#f1f1f1;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif
 }
-.page{
-  max-width:480px;
-  margin:auto;
-  padding:16px
-}
+.page{max-width:480px;margin:auto;padding:16px}
 .center{
   min-height:100vh;
   display:flex;
@@ -25,6 +21,10 @@ body{
   justify-content:center;
   text-align:center
 }
+.hidden{display:none}
+h2,h3{margin:8px 0;font-weight:600}
+p{color:#aaa;font-size:14px}
+
 video{
   width:100%;
   border-radius:14px;
@@ -38,18 +38,14 @@ video.ready{
   opacity:1;
   transform:scale(1);
 }
-h2,h3{margin:8px 0;font-weight:600}
-p{color:#aaa;font-size:14px}
-.hidden{display:none}
 
 .btn{
   display:flex;
-  align-items:center;
   justify-content:center;
-  gap:8px;
+  align-items:center;
   width:100%;
   padding:12px;
-  margin-top:10px;
+  margin-top:8px;
   background:linear-gradient(135deg,#ff0055,#ff3c7d);
   color:#fff;
   text-decoration:none;
@@ -66,13 +62,13 @@ p{color:#aaa;font-size:14px}
 }
 
 .progress{
+  display:none;
   width:100%;
   height:6px;
   background:#222;
   border-radius:99px;
   overflow:hidden;
-  margin-top:8px;
-  display:none
+  margin-top:8px
 }
 .progress div{
   height:100%;
@@ -81,138 +77,36 @@ p{color:#aaa;font-size:14px}
   animation:load 2s forwards
 }
 @keyframes load{to{width:100%}}
-
-.video-wrap{
-  position:relative
-}
-.watermark{
-  position:absolute;
-  bottom:16px;
-  right:16px;
-  opacity:.6;
-  pointer-events:none
-}
 </style>
 </head>
 
 <body>
 
-<!-- EMPTY -->
-<div class="page center hidden" id="empty">
+<div class="page center" id="empty">
   <h2>Video tidak tersedia</h2>
   <p>Gunakan link stream yang valid</p>
 </div>
 
-<!-- WATCH -->
-<div class="page" id="watch">
+<div class="page hidden" id="watch">
 
-  <h3 id="title">Streaming</h3>
+  <h3 id="title"></h3>
 
   <div class="stats">
     <div id="views">👁 0 views</div>
     <div id="online">● 0 online</div>
   </div>
 
-  <div class="video-wrap">
-    <video id="player" controls playsinline></video>
-    <svg class="watermark" width="80" height="20" viewBox="0 0 120 30">
-      <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
-    </svg>
-  </div>
+  <video id="player" controls playsinline></video>
 
-  <!-- DOWNLOAD / FULL CONTENT -->
-  <div id="downloads">
-    <a href="https://contoh-link-asli.mp4" class="btn">
-      🔥 Buka Full Konten
-    </a>
-  </div>
+  <div id="downloads"></div>
 
-  <div class="progress" id="fakeProgress">
-    <div></div>
-  </div>
-
-  <!-- SHARE -->
-  <a href="#" class="btn" id="shareBtn">🔗 Share halaman</a>
+  <div class="progress" id="fakeProgress"><div></div></div>
 
 </div>
 
-<!-- ================= SCRIPT ================= -->
+<script src="app.js"></script>
 
-<script>
-/* ===== BASIC DATA ===== */
-const params = new URLSearchParams(location.search);
-const vid = params.get("v") || "global";
-const videoSrc = params.get("src");
-
-/* ===== VIDEO LOAD ===== */
-const player = document.getElementById("player");
-if(videoSrc){
-  player.src = videoSrc;
-}else{
-  document.getElementById("watch").classList.add("hidden");
-  document.getElementById("empty").classList.remove("hidden");
-}
-
-/* ===== VIEW COUNTER ===== */
-let views = localStorage.getItem("views_"+vid);
-views = views ? parseInt(views)+1 : 1;
-localStorage.setItem("views_"+vid, views);
-document.getElementById("views").textContent = "👁 "+views+" views";
-
-/* ===== ONLINE FAKE ===== */
-setInterval(()=>{
-  document.getElementById("online").textContent =
-    "● "+(Math.floor(Math.random()*30)+10)+" online";
-},4000);
-
-/* ===== SHARE ===== */
-document.getElementById("shareBtn").onclick = e=>{
-  e.preventDefault();
-  navigator.clipboard.writeText(location.href);
-  alert("Link disalin!");
-};
-
-/* ===== VIDEO READY ===== */
-player.addEventListener("loadeddata",()=>{
-  player.classList.add("ready");
-});
-
-/* ===== IKLAN LOGIC ===== */
-const AD_URL = "https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416";
-
-document.addEventListener("click", e=>{
-  const btn = e.target.closest("#downloads a");
-  if(!btn) return;
-
-  e.preventDefault();
-
-  const target = btn.href;
-  const key = "passed_ad_"+target;
-
-  if(!sessionStorage.getItem(key)){
-    sessionStorage.setItem("next_target", target);
-    sessionStorage.setItem("ad_key", key);
-    location.href = AD_URL;
-  }else{
-    window.open(target,"_blank");
-  }
-});
-
-/* ===== BACK FROM AD ===== */
-window.addEventListener("pageshow",()=>{
-  const next = sessionStorage.getItem("next_target");
-  const key = sessionStorage.getItem("ad_key");
-
-  if(next && key && !sessionStorage.getItem(key)){
-    sessionStorage.setItem(key,"1");
-    sessionStorage.removeItem("next_target");
-    sessionStorage.removeItem("ad_key");
-    window.open(next,"_blank");
-  }
-});
-</script>
-
-<!-- ===== POPUNDER LAMA (SATU DOANG) ===== -->
+<!-- POPUNDER (SATU AJA) -->
 <script>
 (function(s){
   s.dataset.zone='10109877';
