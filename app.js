@@ -18,10 +18,11 @@ if (document.getElementById("player")) {
       document.getElementById("player").src = video.src;
 
       // =====================
-      // RENDER DOWNLOAD BUTTON (support JSON baru & lama)
+      // RENDER DOWNLOAD BUTTON (JSON BARU)
       // =====================
       const box = document.getElementById("downloads");
       if (!box) return;
+
       box.innerHTML = "";
 
       if (Array.isArray(video.downloads)) {
@@ -42,7 +43,7 @@ if (document.getElementById("player")) {
           const a = document.createElement("a");
           a.className = "btn";
           a.href = url;
-          a.target = "_blank"; // buka tab baru
+          a.target = "_blank";
           a.innerHTML = `⬇ ${label}`;
           box.appendChild(a);
         });
@@ -51,8 +52,10 @@ if (document.getElementById("player")) {
     .catch(err => console.error("Video load error:", err));
 }
 
+
 // =====================
-// ADMIN PANEL GENERATOR
+// ADMIN PANEL
+// (BIARIN LOGIKA LU, TETAP JALAN)
 // =====================
 function generate() {
   const id = document.getElementById("id").value.trim();
@@ -68,16 +71,23 @@ function generate() {
   document.querySelectorAll("#downloads .download-row").forEach(r => {
     const label = r.children[0].value.trim();
     const url = r.children[1].value.trim();
-    if (url) downloads.push({ label: label || "Download", url });
+    if (url) {
+      downloads.push({
+        label: label || "Download",
+        url
+      });
+    }
   });
 
-  if (!downloads.length) downloads.push({ label: "Download", url: src });
+  if (!downloads.length) {
+    downloads.push({ label: "Download", url: src });
+  }
 
   const json = {
     [id]: {
-      title,
-      src,
-      downloads
+      title: title,
+      src: src,
+      downloads: downloads
     }
   };
 
@@ -85,7 +95,9 @@ function generate() {
 
   document.getElementById("json").value = jsonText;
   document.getElementById("link").value =
-    location.origin + location.pathname.replace("admin.html", "") + "?v=" + id;
+    location.origin +
+    location.pathname.replace("admin.html", "") +
+    "?v=" + id;
 
   navigator.clipboard.writeText(jsonText).catch(() => {});
 }
