@@ -2,93 +2,154 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Admin Panel (Auto ID)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+*{box-sizing:border-box}
 body{
+  margin:0;
   background:#0b0b0b;
-  color:#fff;
-  font-family:system-ui,sans-serif;
+  color:#f1f1f1;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif
+}
+.page{
+  max-width:520px;
+  margin:auto;
   padding:16px
 }
-input,textarea,button{
+h2{margin:8px 0}
+input,textarea{
   width:100%;
-  margin-top:8px;
   padding:10px;
+  margin-top:6px;
+  background:#111;
+  border:1px solid #222;
   border-radius:10px;
-  border:none;
-  font-size:14px
+  color:#fff
 }
+textarea{min-height:120px}
 button{
-  background:#ff0055;
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
   color:#fff;
-  font-weight:600
+  font-weight:600;
+  cursor:pointer
 }
-textarea{height:220px}
-.small{font-size:13px;color:#aaa}
+.download-row{
+  display:flex;
+  gap:6px;
+  margin-top:6px
+}
+.download-row input{
+  flex:1
+}
+.small{
+  font-size:12px;
+  color:#aaa;
+  margin-top:4px
+}
 </style>
 </head>
 
 <body>
 
-<h2>Admin Panel</h2>
+<div class="page">
+  <h2>Admin Panel (Auto ID)</h2>
 
-<input id="id" placeholder="ID video (bebas: 13 / x9Z_k)">
-<input id="titleInput" placeholder="Judul video">
-<input id="stream" placeholder="Link stream (.mp4)">
+  <label>Judul Video</label>
+  <input id="titleInput" placeholder="Judul video">
 
-<input id="dl1_label" placeholder="Label download 1">
-<input id="dl1_url" placeholder="URL download 1">
+  <label>Link Stream</label>
+  <input id="stream" placeholder="https://cdn...mp4">
 
-<input id="dl2_label" placeholder="Label download 2">
-<input id="dl2_url" placeholder="URL download 2">
+  <label>Download</label>
+  <div id="downloads">
+    <div class="download-row">
+      <input placeholder="Label (misal: Full Terabox)">
+      <input placeholder="Link download">
+    </div>
+  </div>
 
-<button onclick="generate()">Generate JSON</button>
+  <button onclick="addDownload()">+ Tambah Download</button>
 
-<p class="small">Copy hasil ini → tempel manual ke videos.json</p>
-<textarea id="json"></textarea>
+  <button onclick="generate()">Generate JSON</button>
 
-<p class="small">Link stream:</p>
-<input id="link" readonly>
+  <label>Hasil JSON</label>
+  <textarea id="json" readonly></textarea>
+
+  <label>Link Stream</label>
+  <input id="link" readonly>
+
+  <p class="small">
+    ⚡ ID dibuat otomatis (random) <br>
+    ⚡ Tinggal copas JSON ke <b>videos.json</b>
+  </p>
+</div>
 
 <script>
-function generate(){
-  const id = idEl.value.trim();
-  const title = titleInput.value.trim();
-  const src = stream.value.trim();
+function autoID(){
+  return "vid_" + Date.now() + "_" + Math.random().toString(36).substr(2,4);
+}
 
-  if(!id || !title || !src){
-    alert("Lengkapi ID, judul, dan stream!");
+function addDownload(){
+  const box = document.getElementById("downloads");
+  const row = document.createElement("div");
+  row.className = "download-row";
+  row.innerHTML = `
+    <input placeholder="Label">
+    <input placeholder="Link download">
+  `;
+  box.appendChild(row);
+}
+
+function generate(){
+  const id = autoID();
+  const title = document.getElementById("titleInput").value.trim();
+  const src = document.getElementById("stream").value.trim();
+
+  if(!title || !src){
+    alert("Judul & stream wajib diisi!");
     return;
   }
 
   const downloads = [];
+  document.querySelectorAll(".download-row").forEach(r=>{
+    const label = r.children[0].value.trim();
+    const url = r.children[1].value.trim();
+    if(url){
+      downloads.push({
+        label: label || "Download",
+        url
+      });
+    }
+  });
 
-  if(dl1_url.value.trim()){
-    downloads.push({
-      label: dl1_label.value || "Download",
-      url: dl1_url.value
-    });
-  }
-
-  if(dl2_url.value.trim()){
-    downloads.push({
-      label: dl2_label.value || "Download",
-      url: dl2_url.value
-    });
+  if(!downloads.length){
+    downloads.push({ label:"Download", url:src });
   }
 
   const json = {
     [id]: {
       title,
       src,
-      downloads: downloads.length ? downloads : [{label:"Download",url:src}]
+      downloads
     }
   };
 
-  json.value = JSON.stringify(json, null, 2);
-  link.value = location.origin + "/player.html?v=" + id;
+  const jsonText = JSON.stringify(json, null, 2);
+  document.getElementById("json").value = jsonText;
+
+  document.getElementById("link").value =
+    location.origin +
+    location.pathname.replace("admin1.html","player.html") +
+    "?v=" + id;
+
+  navigator.clipboard.writeText(jsonText).catch(()=>{});
 }
 </script>
 
