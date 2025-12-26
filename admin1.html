@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  background:#0b0b0b;
+  color:#fff;
+  font-family:system-ui,sans-serif;
+  padding:16px
+}
+input,textarea,button{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-size:14px
+}
+button{
+  background:#ff0055;
+  color:#fff;
+  font-weight:600
+}
+textarea{height:220px}
+.small{font-size:13px;color:#aaa}
+</style>
+</head>
+
+<body>
+
+<h2>Admin Panel</h2>
+
+<input id="id" placeholder="ID video (bebas: 13 / x9Z_k)">
+<input id="titleInput" placeholder="Judul video">
+<input id="stream" placeholder="Link stream (.mp4)">
+
+<input id="dl1_label" placeholder="Label download 1">
+<input id="dl1_url" placeholder="URL download 1">
+
+<input id="dl2_label" placeholder="Label download 2">
+<input id="dl2_url" placeholder="URL download 2">
+
+<button onclick="generate()">Generate JSON</button>
+
+<p class="small">Copy hasil ini → tempel manual ke videos.json</p>
+<textarea id="json"></textarea>
+
+<p class="small">Link stream:</p>
+<input id="link" readonly>
+
+<script>
+function generate(){
+  const id = idEl.value.trim();
+  const title = titleInput.value.trim();
+  const src = stream.value.trim();
+
+  if(!id || !title || !src){
+    alert("Lengkapi ID, judul, dan stream!");
+    return;
+  }
+
+  const downloads = [];
+
+  if(dl1_url.value.trim()){
+    downloads.push({
+      label: dl1_label.value || "Download",
+      url: dl1_url.value
+    });
+  }
+
+  if(dl2_url.value.trim()){
+    downloads.push({
+      label: dl2_label.value || "Download",
+      url: dl2_url.value
+    });
+  }
+
+  const json = {
+    [id]: {
+      title,
+      src,
+      downloads: downloads.length ? downloads : [{label:"Download",url:src}]
+    }
+  };
+
+  json.value = JSON.stringify(json, null, 2);
+  link.value = location.origin + "/player.html?v=" + id;
+}
+</script>
+
+</body>
+</html>
