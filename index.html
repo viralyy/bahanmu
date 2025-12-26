@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Stream</title>
-<meta name="viewport" content="width=device-width, initial-scale=1"><style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -26,16 +29,7 @@ video{
   width:100%;
   border-radius:14px;
   background:#000;
-  margin:12px 0;
-  position:relative;
-}
-.watermark{
-  position:absolute;
-  top:8px;
-  right:8px;
-  color:rgba(255,255,255,0.5);
-  font-size:12px;
-  pointer-events:none;
+  margin:12px 0
 }
 h2,h3{margin:8px 0;font-weight:600}
 p{color:#aaa;font-size:14px}
@@ -49,92 +43,38 @@ p{color:#aaa;font-size:14px}
   text-align:center;
   text-decoration:none;
   border-radius:14px;
-  font-weight:600;
+  font-weight:600
 }
 .hidden{display:none}
-.downloads{margin-top:8px}
-.download-btn{display:flex;gap:8px;margin-top:6px}
-.download-btn a{flex:1;text-decoration:none;color:#fff;text-align:center;padding:10px;border-radius:12px;background:#ff0055;font-weight:600}
-.fake-progress{height:6px;background:#222;border-radius:4px;margin-top:4px;overflow:hidden;}
-.fake-progress div{height:100%;width:0%;background:#ff3c7d;transition:width 0.5s}
-.comment-box{background:#111;padding:10px;border-radius:12px;margin-top:12px;text-align:left;font-size:13px}
-.comment{margin-bottom:6px;color:#ccc}
-.view-counter{font-size:12px;color:#aaa;margin-bottom:8px}
-</style></head><body><div class="page center" id="empty">
+</style>
+</head>
+
+<body>
+
+<div class="page center" id="empty">
   <h2>Video tidak tersedia</h2>
   <p>Gunakan link stream yang valid</p>
-</div><div class="page hidden" id="watch">
-  <div class="view-counter" id="views">Views: 0</div>
+</div>
+
+<div class="page hidden" id="watch">
   <h3 id="title"></h3>
-  <div style="position:relative">
-    <video id="player" controls playsinline></video>
-    <div class="watermark">MyStream</div>
-  </div>  <div id="downloads" class="downloads"></div>  <div id="fakeProgressContainer" class="fake-progress"><div></div></div>  <div class="comment-box" id="comments"></div>  <div class="share" style="margin-top:10px;display:flex;gap:8px">
-    <a class="btn" id="shareBtn" href="#">Share This Page</a>
-  </div>
-</div><script src="app.js"></script><iframe src="histats.html" style="display:none"></iframe><!-- POPUNDER --><script>
+  <video id="player" controls playsinline></video>
+
+<div id="downloads"></div>
+
+<script src="app.js"></script>
+
+<iframe src="histats.html" style="display:none"></iframe>
+
+<!-- POPUNDER -->
+<script>
 (function(s){
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement, document.body].filter(Boolean)
   .pop()
   .appendChild(document.createElement('script')));
-</script><script>
-// =====================
-// STREAM FEATURES
-// =====================
-if(document.getElementById('player')){
-  fetch('videos.json?_='+Date.now()).then(r=>r.json()).then(data=>{
-    const id = new URLSearchParams(location.search).get('v');
-    if(!id || !data[id]) return;
-    const video = data[id];
+</script>
 
-    document.getElementById('empty').style.display='none';
-    document.getElementById('watch').classList.remove('hidden');
-
-    document.getElementById('title').textContent = video.title;
-    document.getElementById('player').src = video.src;
-
-    // Downloads
-    const downloadsDiv = document.getElementById('downloads');
-    downloadsDiv.innerHTML='';
-    video.downloads.forEach(d=>{
-      const a = document.createElement('a');
-      a.href = d.url;
-      a.target='_blank';
-      a.textContent = d.label;
-      a.className='download-btn';
-      a.onclick = ()=>{
-        const bar = document.querySelector('#fakeProgressContainer div');
-        bar.style.width='0%';
-        setTimeout(()=>{bar.style.width='100%'},50);
-      };
-      downloadsDiv.appendChild(a);
-    });
-
-    // Fake comments
-    const comments = ['Mantap min', 'Video nya bikin betah min', 'min aku udah subs channel kamu', '🔥🔥🔥', 'Gokil min'];
-    const commentsDiv = document.getElementById('comments');
-    commentsDiv.innerHTML='';
-    comments.forEach(c=>{
-      const p = document.createElement('div');
-      p.className='comment';
-      p.textContent=c;
-      commentsDiv.appendChild(p);
-    });
-
-    // View counter
-    let views = parseInt(localStorage.getItem('views_'+id)||'0');
-    views++;
-    localStorage.setItem('views_'+id,views);
-    document.getElementById('views').textContent='Views: '+views;
-
-    // Share button
-    document.getElementById('shareBtn').onclick = ()=>{
-      navigator.clipboard.writeText(location.href);
-      alert('Link halaman disalin ✅');
-    };
-  }).catch(err=>console.error(err));
-}
-</script></body>
+</body>
 </html>
