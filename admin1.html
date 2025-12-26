@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel (Auto ID)</title>
+<title>Admin Panel Auto ID</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -18,7 +18,7 @@ body{
   margin:auto;
   padding:16px
 }
-h2{margin:8px 0}
+h2,h3{margin:10px 0}
 input,textarea{
   width:100%;
   padding:10px;
@@ -28,11 +28,11 @@ input,textarea{
   border-radius:10px;
   color:#fff
 }
-textarea{min-height:120px}
+textarea{resize:none}
 button{
   width:100%;
   padding:12px;
-  margin-top:12px;
+  margin-top:10px;
   border:none;
   border-radius:14px;
   background:linear-gradient(135deg,#ff0055,#ff3c7d);
@@ -40,118 +40,169 @@ button{
   font-weight:600;
   cursor:pointer
 }
+.btn-gray{background:#333}
+.small{font-size:12px;color:#aaa;margin-top:6px}
+.card{
+  background:#111;
+  padding:12px;
+  border-radius:14px;
+  margin-top:10px
+}
 .download-row{
   display:flex;
   gap:6px;
   margin-top:6px
 }
-.download-row input{
-  flex:1
+.download-row input{flex:1}
+.download-row button{width:42px}
+video{
+  width:100%;
+  border-radius:12px;
+  margin-top:8px;
+  background:#000
 }
-.small{
-  font-size:12px;
-  color:#aaa;
-  margin-top:4px
+.preview-btn{
+  display:block;
+  padding:10px;
+  margin-top:6px;
+  background:#ff0055;
+  border-radius:12px;
+  text-align:center;
+  font-weight:600
 }
+.row{display:flex;gap:6px;margin-top:6px}
+.row button{flex:1}
 </style>
 </head>
 
 <body>
-
 <div class="page">
-  <h2>Admin Panel (Auto ID)</h2>
 
-  <label>Judul Video</label>
-  <input id="titleInput" placeholder="Judul video">
+<h2>Admin Panel (Auto ID)</h2>
 
-  <label>Link Stream</label>
-  <input id="stream" placeholder="https://cdn...mp4">
+<input id="titleInput" placeholder="Judul video">
+<input id="stream" placeholder="Link stream (.mp4)">
 
-  <label>Download</label>
-  <div id="downloads">
-    <div class="download-row">
-      <input placeholder="Label (misal: Full Terabox)">
-      <input placeholder="Link download">
-    </div>
-  </div>
+<div class="small">Tombol Download</div>
+<div id="downloads"></div>
+<button class="btn-gray" onclick="addDownload()">➕ Tambah Download</button>
 
-  <button onclick="addDownload()">+ Tambah Download</button>
+<button onclick="generate()">Generate</button>
 
-  <button onclick="generate()">Generate JSON</button>
+<div class="small">Preview</div>
+<div id="preview" class="card"></div>
 
-  <label>Hasil JSON</label>
-  <textarea id="json" readonly></textarea>
+<div class="small">JSON Output</div>
+<textarea id="json" rows="8" readonly></textarea>
+<button class="btn-gray" onclick="copy('json')">📋 Salin JSON</button>
 
-  <label>Link Stream</label>
-  <input id="link" readonly>
+<div class="small">Link Stream</div>
+<textarea id="link" rows="2" readonly></textarea>
+<button class="btn-gray" onclick="copy('link')">📋 Salin Link</button>
 
-  <p class="small">
-    ⚡ ID dibuat otomatis (random) <br>
-    ⚡ Tinggal copas JSON ke <b>videos.json</b>
-  </p>
+<h3>History</h3>
+<div id="history"></div>
+
 </div>
 
 <script>
+const $ = id => document.getElementById(id);
+let editIndex = null;
+
+// ===== AUTO ID PENDEK =====
 function autoID(){
-  return "vid_" + Date.now() + "_" + Math.random().toString(36).substr(2,4);
+  return 'v' + Math.random().toString(36).substr(2,5);
 }
 
-function addDownload(){
-  const box = document.getElementById("downloads");
-  const row = document.createElement("div");
-  row.className = "download-row";
-  row.innerHTML = `
-    <input placeholder="Label">
-    <input placeholder="Link download">
+// ===== DOWNLOAD FIELD =====
+function addDownload(label='', url=''){
+  const div = document.createElement('div');
+  div.className = 'download-row';
+  div.innerHTML = `
+    <input placeholder="Label" value="${label}">
+    <input placeholder="Link download" value="${url}">
+    <button class="btn-gray" onclick="this.parentNode.remove()">❌</button>
   `;
-  box.appendChild(row);
+  $('downloads').appendChild(div);
 }
+addDownload();
 
+// ===== GENERATE =====
 function generate(){
   const id = autoID();
-  const title = document.getElementById("titleInput").value.trim();
-  const src = document.getElementById("stream").value.trim();
-
-  if(!title || !src){
-    alert("Judul & stream wajib diisi!");
-    return;
-  }
+  const title = $('titleInput').value.trim();
+  const src = $('stream').value.trim();
+  if(!title || !src) return alert('Judul & stream wajib diisi');
 
   const downloads = [];
-  document.querySelectorAll(".download-row").forEach(r=>{
+  document.querySelectorAll('.download-row').forEach(r=>{
     const label = r.children[0].value.trim();
     const url = r.children[1].value.trim();
-    if(url){
-      downloads.push({
-        label: label || "Download",
-        url
-      });
-    }
+    if(url) downloads.push({label:label||'Download',url});
   });
 
-  if(!downloads.length){
-    downloads.push({ label:"Download", url:src });
-  }
-
-  const json = {
-    [id]: {
-      title,
-      src,
-      downloads
-    }
+  const data = {
+    [id]: { title, src, downloads }
   };
 
-  const jsonText = JSON.stringify(json, null, 2);
-  document.getElementById("json").value = jsonText;
-
-  document.getElementById("link").value =
+  $('json').value = JSON.stringify(data, null, 2);
+  $('link').value =
     location.origin +
-    location.pathname.replace("admin1.html","player.html") +
-    "?v=" + id;
+    location.pathname.replace('admin1.html','player.html') +
+    '?v=' + id;
 
-  navigator.clipboard.writeText(jsonText).catch(()=>{});
+  renderPreview(data[id]);
+
+  let h = JSON.parse(localStorage.getItem('history_auto')||'[]');
+  h.unshift(data);
+  localStorage.setItem('history_auto', JSON.stringify(h.slice(0,10)));
+  renderHistory();
 }
-</script>
 
+// ===== PREVIEW =====
+function renderPreview(v){
+  $('preview').innerHTML =
+    `<b>${v.title}</b>
+     <video src="${v.src}" controls></video>` +
+    v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
+}
+
+// ===== COPY =====
+function copy(id){
+  const el = $(id);
+  if(!el.value) return;
+  el.select();
+  navigator.clipboard.writeText(el.value);
+  alert('Disalin ✅');
+}
+
+// ===== HISTORY =====
+function renderHistory(){
+  const h = JSON.parse(localStorage.getItem('history_auto')||'[]');
+  $('history').innerHTML = '';
+  h.forEach((o,i)=>{
+    const k = Object.keys(o)[0];
+    const v = o[k];
+    $('history').innerHTML += `
+      <div class="card">
+        <b>${k}</b> — ${v.title}
+        <div class="row">
+          <button onclick='renderPreview(${JSON.stringify(v).replace(/"/g,"&quot;")})'>Preview</button>
+          <button class="btn-gray" onclick="del(${i})">Hapus</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function del(i){
+  let h = JSON.parse(localStorage.getItem('history_auto'));
+  h.splice(i,1);
+  localStorage.setItem('history_auto',JSON.stringify(h));
+  renderHistory();
+}
+
+renderHistory();
+</script>
 </body>
 </html>
