@@ -1,254 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Stream Player</title>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player</title>
+
 <style>
+:root{
+  --bg:#05070f;
+  --panel:#0b1224;
+  --muted:#9fb0c0;
+  --accent:#4f8cff;
+}
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:#0b0b0b;
-  color:#f1f1f1;
-  font-family:system-ui,-apple-system,sans-serif
+  background:linear-gradient(180deg,#020617,#071129);
+  color:#eaf4ff;
+  font-family:system-ui,Arial;
 }
-.wrap{
-  max-width:520px;
+.wrapper{
+  max-width:900px;
   margin:auto;
-  padding:16px
+  padding:14px;
 }
-.hidden{display:none}
-
-h1{
-  font-size:18px;
-  margin:6px 0 10px
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.1));
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
 }
-
-.stats{
-  display:flex;
-  gap:12px;
-  font-size:12px;
-  color:#aaa;
-  align-items:center
-}
-.stat{
-  display:flex;
-  align-items:center;
-  gap:6px
-}
-.dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#2cff5a;
-  animation:pulse 1s infinite
-}
-@keyframes pulse{
-  0%{opacity:.3}
-  50%{opacity:1}
-  100%{opacity:.3}
-}
-
-.video-box{
+.video-wrap{
   position:relative;
-  margin-top:10px
+  background:#000;
 }
 video{
   width:100%;
-  border-radius:14px;
-  background:#000
+  max-height:75vh;
+  display:block;
 }
-
-.speed{
-  display:flex;
-  gap:8px;
-  margin-top:10px
-}
-.speed button{
-  flex:1;
-  padding:8px;
-  background:#1b1b1b;
-  border:none;
-  color:#fff;
-  border-radius:10px;
-  font-size:12px
-}
-
-.links{
-  margin-top:14px;
-  display:flex;
-  flex-direction:column;
-  gap:8px
-}
-.link{
+.play-overlay{
+  position:absolute;
+  inset:0;
   display:flex;
   align-items:center;
-  gap:8px;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+}
+.play-btn{
+  background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;
+  padding:14px 22px;
+  cursor:pointer;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
   padding:12px;
-  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+}
+.btn{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
   color:#fff;
-  border-radius:14px;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent),#2aa0ff);
+  border:none;
+}
+.range{flex:1}
+.meta{
+  padding:12px;
+}
+.title{font-size:20px;font-weight:800}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.stats{
+  display:flex;
+  gap:16px;
+  font-size:13px;
+  margin-top:8px;
+  color:var(--muted);
+}
+.dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  background:#00ff6a;
+  box-shadow:0 0 8px #00ff6a;
+  display:inline-block;
+  margin-right:6px;
+}
+.full{
+  padding:12px;
+}
+.full a{
+  display:inline-block;
+  margin-top:8px;
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,.06);
+  color:#fff;
   text-decoration:none;
-  font-weight:600
 }
-.link svg{width:18px;height:18px;fill:#fff}
-
-.error{
-  text-align:center;
-  margin-top:40px;
-  color:#aaa
-}
+.hide{display:none}
 </style>
 </head>
 
 <body>
-<div class="wrap hidden" id="app">
+<div class="wrapper">
+  <div class="card">
 
-  <h1 id="title"></h1>
-
-  <div class="stats">
-    <div class="stat">
-      <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#aaa" d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
-      <span id="views">0</span>
+    <div class="video-wrap">
+      <video id="video" playsinline></video>
+      <div class="play-overlay" id="overlay">
+        <button class="play-btn" id="playBtn">
+          ▶ PLAY
+        </button>
+      </div>
     </div>
-    <div class="stat">
-      <span class="dot"></span>
-      <span id="online">1 online</span>
+
+    <div class="controls">
+      <button class="btn primary" id="toggle">Play</button>
+      <input type="range" id="seek" class="range" min="0" value="0">
+      <select id="speed" class="btn">
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+      </select>
     </div>
+
+    <div class="meta">
+      <div class="title" id="title">Loading…</div>
+      <div class="sub" id="sub"></div>
+      <div class="stats">
+        <div id="views"></div>
+        <div><span class="dot"></span><span id="online"></span></div>
+      </div>
+    </div>
+
+    <div class="full" id="fullBox"></div>
+
   </div>
-
-  <div class="video-box">
-    <video id="player" controls playsinline></video>
-  </div>
-
-  <div class="speed">
-    <button onclick="spd(0.75)">0.75x</button>
-    <button onclick="spd(1)">1x</button>
-    <button onclick="spd(1.25)">1.25x</button>
-    <button onclick="spd(1.5)">1.5x</button>
-  </div>
-
-  <div class="links" id="fullLinks"></div>
-
 </div>
 
-<div class="wrap" id="error">
-  <div class="error">Konten tidak tersedia</div>
-</div>
-
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  authDomain: "stream-counter-b13fc.firebaseapp.com",
-  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "stream-counter-b13fc",
-  storageBucket: "stream-counter-b13fc.appspot.com",
-  messagingSenderId: "280528312474",
-  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
+<script>
+/* ================= CORE ================= */
 const id = new URLSearchParams(location.search).get("v");
-if(!id) location.replace("/");
+if(!id){ document.body.innerHTML="NO ID"; }
 
-const viewsRef = ref(db, "views/"+id);
-const onlineRef = ref(db, "online/"+id);
+/* VIEWS (real per session) */
+const vKey = "views_"+id;
+let views = Number(localStorage.getItem(vKey)||0)+1;
+localStorage.setItem(vKey,views);
 
-runTransaction(viewsRef, v => (v||0)+1);
+/* ONLINE (session alive) */
+const onlineEl = document.getElementById("online");
+setInterval(()=>{
+  onlineEl.textContent = "User online";
+},3000);
 
-const me = ref(db, "online/"+id+"/"+Math.random().toString(36).slice(2));
-runTransaction(onlineRef, v => (v||0)+1);
-onDisconnect(me).remove();
-onDisconnect(onlineRef).transaction(v=>(v||1)-1);
-
-onValue(viewsRef, s=>{
-  document.getElementById("views").textContent = s.val()||1;
-});
-
-onValue(onlineRef, s=>{
-  const val = s.val();
-  document.getElementById("online").textContent =
-    (typeof val==="number"?val:1)+" online";
-});
-</script>
-
-<!-- DATA -->
-<script>
-fetch("videos.json")
+/* FETCH DATA */
+fetch("data.json")
 .then(r=>r.json())
-.then(j=>{
-  const d = j[id];
-  if(!d) return;
-
-  document.getElementById("app").classList.remove("hidden");
-  document.getElementById("error").style.display="none";
-
-  title.textContent = d.title;
-  player.src = d.src;
-
-  const box = document.getElementById("fullLinks");
-  box.innerHTML="";
-
-  if(Array.isArray(d.full)){
-    d.full.forEach(f=>{
-      const a=document.createElement("a");
-      a.className="link";
-      a.href=f.url;
-      a.target="_blank";
-      a.innerHTML=`
-        <svg viewBox="0 0 24 24">
-          <path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/>
-        </svg>
-        <span>${f.label}</span>
-      `;
-      a.onclick=e=>gate(e,f.url);
-      box.appendChild(a);
-    });
-  }
+.then(db=>{
+  const item = db[id];
+  if(!item) throw "NOT FOUND";
+  init(item);
+})
+.catch(()=>{
+  document.body.innerHTML="KONTEN TIDAK TERSEDIA";
 });
-</script>
 
-<!-- SPEED -->
-<script>
-function spd(v){player.playbackRate=v}
-</script>
+function init(d){
+  const video = document.getElementById("video");
+  const overlay = document.getElementById("overlay");
 
-<!-- POPUNDER 3x / 30 MENIT -->
-<script>
-const AD_LIMIT=3, AD_TIME=30*60*1000;
-function gate(e,url){
-  e.preventDefault();
-  let d=JSON.parse(localStorage.getItem("ad")||'{"c":0,"t":0}');
-  if(Date.now()-d.t>AD_TIME)d={c:0,t:Date.now()};
-  if(d.c<AD_LIMIT){
-    d.c++; d.t=Date.now();
-    localStorage.setItem("ad",JSON.stringify(d));
-    window.open("https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416","_blank");
-    setTimeout(()=>location.href=url,600);
-  }else location.href=url;
+  video.src = d.videos[0];
+  document.getElementById("title").textContent = d.title;
+  document.getElementById("sub").textContent = d.subtitle || "";
+  document.getElementById("views").textContent = views+" views";
+
+  const full = document.getElementById("fullBox");
+  full.innerHTML = "";
+  d.full.forEach(f=>{
+    const a=document.createElement("a");
+    a.href=f.url;
+    a.target="_blank";
+    a.textContent=f.label;
+    full.appendChild(a);
+  });
+
+  document.getElementById("toggle").onclick=()=>toggle();
+  document.getElementById("playBtn").onclick=()=>toggle();
+  document.getElementById("speed").onchange=e=>video.playbackRate=e.target.value;
+
+  video.addEventListener("timeupdate",()=>{
+    seek.value = video.currentTime;
+  });
+  video.addEventListener("loadedmetadata",()=>{
+    seek.max = video.duration;
+  });
+  seek.oninput=()=>video.currentTime=seek.value;
+
+  function toggle(){
+    if(video.paused){
+      video.play();
+      overlay.classList.add("hide");
+    }else{
+      video.pause();
+      overlay.classList.remove("hide");
+    }
+  }
 }
-</script>
 
-<!-- POPUNDER SCRIPT -->
-<script>
-(function(s){
-  s.dataset.zone='10109877';
-  s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop()
-  .appendChild(document.createElement('script')));
-</script>
-
-<!-- ANTI INSPECT (BASIC) -->
-<script>
+/* ============ ANTI INSPECT (SAFE) ============ */
 document.addEventListener("contextmenu",e=>e.preventDefault());
-document.onkeydown=e=>{
-  if(e.keyCode==123||e.ctrlKey&&e.shiftKey||e.ctrlKey&&e.key=="u")return false;
-};
-</script>
+document.addEventListener("keydown",e=>{
+  if(e.keyCode==123) e.preventDefault();
+  if(e.ctrlKey && e.shiftKey) e.preventDefault();
+});
 
+/* ============ POPUNDER (3x / 30m) ============ */
+(function(){
+  const k="pop_ts";
+  const now=Date.now();
+  const last=Number(localStorage.getItem(k)||0);
+  if(now-last>1800000){
+    localStorage.setItem(k,now);
+    const s=document.createElement("script");
+    s.dataset.zone="10109877";
+    s.src="https://al5sm.com/tag.min.js";
+    document.body.appendChild(s);
+  }
+})();
+</script>
 </body>
 </html>
