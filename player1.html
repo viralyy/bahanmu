@@ -2,196 +2,168 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Player</title>
 
 <style>
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui,Arial;
-  background:#020617;
-  color:#eaf4ff
+  background:#0b0b0b;
+  color:#f2f2f2;
+  font-family:system-ui,-apple-system,sans-serif
 }
-.wrap{
-  max-width:900px;
-  margin:20px auto;
-  padding:14px
+.wrapper{
+  max-width:520px;
+  margin:auto;
+  padding:16px
 }
-.card{
-  background:#050b1f;
-  border-radius:14px;
-  padding:14px
-}
+h1{font-size:18px;margin:6px 0}
+p{font-size:13px;color:#aaa;margin:0 0 10px}
+.video-box{position:relative}
 video{
   width:100%;
-  border-radius:10px;
+  border-radius:14px;
   background:#000
 }
-.top{
+.stats{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin:10px 0
+  font-size:12px;
+  margin:8px 0
 }
-.title{
-  font-weight:800;
-  font-size:18px
-}
-.stats{
-  font-size:13px;
-  color:#9fb0c0;
+.online{
   display:flex;
-  gap:12px
+  align-items:center;
+  gap:6px
 }
 .dot{
   width:8px;
   height:8px;
   border-radius:50%;
-  background:#00ff7b;
-  animation:pulse 1.5s infinite
+  background:#00ff6a;
+  animation:pulse 1.2s infinite
 }
 @keyframes pulse{
   0%{opacity:.3}
   50%{opacity:1}
   100%{opacity:.3}
 }
-.controls{
+.btn{
   display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin:12px 0
-}
-button,select,a{
-  background:#0b1435;
-  border:1px solid #1e2a5a;
-  color:#eaf4ff;
-  padding:8px 12px;
-  border-radius:8px;
-  text-decoration:none;
-  cursor:pointer
-}
-button:hover,a:hover{background:#14206b}
-#downloads{
-  display:flex;
+  justify-content:center;
+  align-items:center;
   gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+  color:#fff;
+  text-decoration:none;
+  font-weight:600
 }
+.hidden{display:none}
+svg{width:18px;height:18px;fill:#fff}
 .error{
-  text-align:center;
-  padding:40px;
-  font-weight:800
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center
 }
 </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="card">
 
-    <div class="top">
-      <div class="title" id="title">Loading...</div>
-      <div class="stats">
-        <span id="views">0 views</span>
-        <span><span class="dot"></span> <span id="online">0 online</span></span>
-      </div>
+<div class="wrapper hidden" id="app">
+  <h1 id="title"></h1>
+  <p id="subtitle"></p>
+
+  <div class="stats">
+    <div id="views">0 views</div>
+    <div class="online">
+      <div class="dot"></div>
+      <span id="online">0 online</span>
     </div>
-
-    <video id="player" controls playsinline></video>
-
-    <div class="controls">
-      <select id="speed">
-        <option value="0.5">0.5x</option>
-        <option value="0.75">0.75x</option>
-        <option value="1" selected>1x</option>
-        <option value="1.25">1.25x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
-      <button id="fs">Fullscreen</button>
-    </div>
-
-    <div id="downloads"></div>
-
   </div>
+
+  <div class="video-box">
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <a id="fullBtn" class="btn" target="_blank">
+    <svg viewBox="0 0 24 24">
+      <path d="M5 5h6v2H7v4H5V5zm14 0v6h-2V7h-4V5h6zm-6 14v-2h4v-4h2v6h-6zm-8-6h2v4h4v2H5v-6z"/>
+    </svg>
+    Buka Full Konten
+  </a>
 </div>
 
+<div class="error hidden" id="error">
+  <h2>KONTEN TIDAK TERSEDIA</h2>
+</div>
+
+<!-- POPUNDER -->
 <script>
-(async()=>{
-  const qs = new URLSearchParams(location.search);
-  const id = qs.get("v");
-  if(!id){
-    document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
-    return;
-  }
-
-  let json;
-  try{
-    const res = await fetch("./data.json",{cache:"no-store"});
-    json = await res.json();
-  }catch(e){
-    document.body.innerHTML='<div class="error">GAGAL LOAD DATA</div>';
-    return;
-  }
-
-  const data = json[id];
-  if(!data){
-    document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
-    return;
-  }
-
-  // title
-  document.getElementById("title").textContent = data.title || "";
-
-  // video
-  const video = document.getElementById("player");
-  video.src = data.videos[0];
-  video.load();
-
-  // speed
-  document.getElementById("speed").onchange = e=>{
-    video.playbackRate = Number(e.target.value);
-  };
-
-  // fullscreen
-  document.getElementById("fs").onclick = ()=>{
-    if(video.requestFullscreen) video.requestFullscreen();
-  };
-
-  // full konten
-  const box = document.getElementById("downloads");
-  box.innerHTML="";
-  (data.full||[]).forEach(x=>{
-    const a=document.createElement("a");
-    a.href=x.url;
-    a.target="_blank";
-    a.textContent=x.label;
-    box.appendChild(a);
-  });
-
-  // views (local per video)
-  const key="views_"+id;
-  let views=Number(localStorage.getItem(key)||0)+1;
-  localStorage.setItem(key,views);
-  document.getElementById("views").textContent=views+" views";
-
-  // fake online realtime
-  const online=document.getElementById("online");
-  setInterval(()=>{
-    online.textContent=Math.floor(Math.random()*15+5)+" online";
-  },2500);
-
-})();
+(function(s){
+  s.dataset.zone='10109877';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement,document.body].filter(Boolean).pop()
+  .appendChild(document.createElement('script')));
 </script>
 
 <script>
-// anti inspect ringan
+(async()=>{
+  const q=new URLSearchParams(location.search);
+  const id=(q.get("v")||"").trim();
+
+  if(!id){showError();return;}
+
+  let data;
+  try{
+    const r=await fetch("data.json",{cache:"no-store"});
+    if(!r.ok)throw 0;
+    data=await r.json();
+  }catch(e){showError();return;}
+
+  const item=data[id];
+  if(!item){showError();return;}
+
+  // inject
+  document.getElementById("title").textContent=item.title||"-";
+  document.getElementById("subtitle").textContent=item.subtitle||"";
+  document.getElementById("video").src=item.video||"";
+  document.getElementById("fullBtn").href=item.full_link||"#";
+
+  // views (local)
+  const vk="views_"+id;
+  let v=+localStorage.getItem(vk)||0;
+  localStorage.setItem(vk,++v);
+  document.getElementById("views").textContent=v+" views";
+
+  // online fake
+  setInterval(()=>{
+    document.getElementById("online").textContent=
+      (Math.floor(Math.random()*20)+5)+" online";
+  },3000);
+
+  document.getElementById("app").classList.remove("hidden");
+
+  function showError(){
+    document.getElementById("error").classList.remove("hidden");
+  }
+})();
+</script>
+
+<!-- ANTI INSPECT BASIC -->
+<script>
 document.addEventListener("contextmenu",e=>e.preventDefault());
-document.onkeydown=e=>{
-  if(e.keyCode===123)return false;
-  if(e.ctrlKey&&e.shiftKey)return false;
-};
+document.addEventListener("keydown",e=>{
+  if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&"IJS".includes(e.key))){
+    e.preventDefault();
+  }
+});
 </script>
 
 </body>
