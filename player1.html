@@ -20,11 +20,7 @@ body{
   color:var(--text);
   font-family:system-ui,Segoe UI,Inter,Arial;
 }
-.wrap{
-  max-width:720px;
-  margin:auto;
-  padding:14px;
-}
+.wrap{max-width:720px;margin:auto;padding:14px}
 .card{
   background:linear-gradient(180deg,#0b1020,#060814);
   border-radius:14px;
@@ -34,50 +30,33 @@ body{
 
 h1{font-size:18px;margin:6px 0}
 .stats{
-  display:flex;
-  gap:14px;
-  font-size:12px;
-  color:var(--muted);
-  align-items:center;
+  display:flex;gap:14px;font-size:12px;color:var(--muted)
 }
-.online{
-  display:flex;align-items:center;gap:6px;
-}
+.online{display:flex;align-items:center;gap:6px}
 .dot{
   width:8px;height:8px;border-radius:50%;
-  background:#22ff00;
-  opacity:.3;
+  background:#22ff00;opacity:.25;
   box-shadow:0 0 6px #22ff00;
 }
 .dot.on{opacity:1}
 
-.video-box{
-  margin-top:10px;
-  position:relative;
-}
 video{
   width:100%;
   border-radius:12px;
   background:#000;
-  opacity:0;
-  transform:scale(.98);
+  margin-top:10px;
+  opacity:0;transform:scale(.98);
   transition:.4s ease;
 }
-video.ready{
-  opacity:1;
-  transform:scale(1);
-}
+video.ready{opacity:1;transform:scale(1)}
 
 .controls{
-  display:flex;
-  gap:8px;
-  margin-top:8px;
-  flex-wrap:wrap;
+  display:flex;gap:8px;margin-top:10px;flex-wrap:wrap
 }
 .btn{
   background:#111827;
   border:1px solid #1f2937;
-  color:var(--text);
+  color:#fff;
   padding:8px 12px;
   border-radius:10px;
   cursor:pointer;
@@ -89,18 +68,41 @@ video.ready{
 }
 select{
   background:#111827;
-  color:var(--text);
+  color:#fff;
   border:1px solid #1f2937;
   border-radius:10px;
   padding:6px;
 }
 
-.full{
-  margin-top:14px;
+/* FULL KONTEN POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:flex-end;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
 }
-.full a{
+.popup.show{
+  opacity:1;
+  pointer-events:auto;
+}
+.popup-box{
+  width:100%;
+  background:#0b1020;
+  border-radius:14px 14px 0 0;
+  padding:16px;
+  transform:translateY(40px);
+  transition:.3s;
+}
+.popup.show .popup-box{
+  transform:translateY(0);
+}
+.popup-box a{
   display:block;
-  margin-top:6px;
+  margin-top:8px;
   padding:10px;
   border-radius:10px;
   background:#111827;
@@ -108,69 +110,53 @@ select{
   color:#fff;
   text-decoration:none;
 }
-.full a:hover{background:#1f2937}
-
-#error{
-  text-align:center;
-  padding:40px 10px;
-}
 </style>
 </head>
 
 <body>
 
 <div class="wrap">
+  <div id="app" class="card hidden">
 
-<div id="error" class="hidden">
-  <h1>KONTEN TIDAK TERSEDIA</h1>
-</div>
+    <h1 id="title"></h1>
 
-<div id="app" class="card hidden">
-
-  <h1 id="title"></h1>
-
-  <div class="stats">
-    <div id="views">0 views</div>
-    <div class="online">
-      <div id="dot" class="dot"></div>
-      <span id="onlineText">0 online</span>
+    <div class="stats">
+      <div id="views">0 views</div>
+      <div class="online">
+        <div id="dot" class="dot"></div>
+        <span id="onlineText">0 online</span>
+      </div>
     </div>
+
+    <video id="player" playsinline></video>
+
+    <div class="controls">
+      <button id="play" class="btn primary">Play</button>
+      <button id="mute" class="btn">Mute</button>
+      <select id="speed">
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+      </select>
+      <button id="openFull" class="btn">Full Konten</button>
+    </div>
+
   </div>
-
-  <div class="video-box">
-    <video id="player" controls playsinline></video>
-  </div>
-
-  <div class="controls">
-    <button id="play" class="btn primary">Play</button>
-    <button id="mute" class="btn">Mute</button>
-
-    <select id="speed">
-      <option value="0.5">0.5x</option>
-      <option value="0.75">0.75x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-      <option value="2">2x</option>
-    </select>
-  </div>
-
-  <div class="full">
-    <strong>Full Konten</strong>
-    <div id="fullLinks"></div>
-  </div>
-
-</div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FULL KONTEN POPUP -->
+<div id="popup" class="popup">
+  <div class="popup-box" id="popupBox"></div>
+</div>
+
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, runTransaction, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  authDomain: "stream-counter-b13fc.firebaseapp.com",
   databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "stream-counter-b13fc",
   appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
@@ -179,91 +165,64 @@ const firebaseConfig = {
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 
-// ========== LOAD DATA ==========
-const params = new URLSearchParams(location.search);
-const vid = params.get("v");
-
-fetch("videos.json?_=" + Date.now())
+const vid = new URLSearchParams(location.search).get("v");
+fetch("videos.json?_="+Date.now())
 .then(r=>r.json())
 .then(data=>{
-  if(!vid || !data[vid]) throw "not found";
-  init(data[vid]);
-})
-.catch(()=>{
-  document.getElementById("error").classList.remove("hidden");
+  if(!vid || !data[vid]) return;
+  start(data[vid]);
 });
 
-function init(video){
-  document.getElementById("app").classList.remove("hidden");
+function start(video){
+  const app=document.getElementById("app");
+  app.classList.remove("hidden");
 
-  const player = document.getElementById("player");
-  const title = document.getElementById("title");
-  const viewsEl = document.getElementById("views");
-  const onlineEl = document.getElementById("onlineText");
-  const dot = document.getElementById("dot");
-  const fullBox = document.getElementById("fullLinks");
+  const player=document.getElementById("player");
+  const viewsEl=document.getElementById("views");
+  const onlineEl=document.getElementById("onlineText");
+  const dot=document.getElementById("dot");
 
-  title.textContent = video.title;
-  player.src = video.src;
+  document.getElementById("title").textContent=video.title;
+  player.src=video.src;
 
-  player.addEventListener("loadeddata",()=>player.classList.add("ready"));
+  player.onloadeddata=()=>player.classList.add("ready");
 
-  // FULL LINKS (ANTI DUPLIKAT)
-  fullBox.innerHTML = "";
-  (video.downloads||[]).forEach(d=>{
-    const a = document.createElement("a");
-    a.href = d.url;
-    a.target = "_blank";
-    a.textContent = d.label;
-    fullBox.appendChild(a);
-  });
+  // CONTROLS
+  document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
+  document.getElementById("mute").onclick=()=>player.muted=!player.muted;
+  document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  // ===== VIEWS REAL =====
-  const vRef = ref(db,"views/"+vid);
-  runTransaction(vRef, n=>(n||0)+1);
-  onValue(vRef,s=>viewsEl.textContent = s.val()+" views");
+  // FULL POPUP
+  const popup=document.getElementById("popup");
+  const box=document.getElementById("popupBox");
+  document.getElementById("openFull").onclick=()=>{
+    box.innerHTML="";
+    (video.downloads||[]).forEach(d=>{
+      const a=document.createElement("a");
+      a.href=d.url;a.target="_blank";a.textContent=d.label;
+      box.appendChild(a);
+    });
+    popup.classList.add("show");
+  };
+  popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
 
-  // ===== ONLINE REAL =====
-  const sid = Date.now()+"_"+Math.random();
-  const oRef = ref(db,"online/"+vid+"/"+sid);
+  // VIEWS
+  const vRef=ref(db,"views/"+vid);
+  runTransaction(vRef,n=>(n||0)+1);
+  onValue(vRef,s=>viewsEl.textContent=s.val()+" views");
+
+  // ONLINE
+  const sid=Date.now()+"_"+Math.random();
+  const oRef=ref(db,"online/"+vid+"/"+sid);
   set(oRef,true);
   onDisconnect(oRef).remove();
 
-  onValue(ref(db,"online/"+vid),snap=>{
-    const c = snap.exists()?Object.keys(snap.val()).length:0;
-    onlineEl.textContent = c+" online";
+  onValue(ref(db,"online/"+vid),s=>{
+    const c=s.exists()?Object.keys(s.val()).length:0;
+    onlineEl.textContent=c+" online";
     dot.classList.toggle("on",c>0);
   });
-
-  // ===== CONTROLS =====
-  document.getElementById("play").onclick=()=>{
-    if(player.paused) player.play();
-    else player.pause();
-  };
-  document.getElementById("mute").onclick=()=>{
-    player.muted=!player.muted;
-  };
-  document.getElementById("speed").onchange=e=>{
-    player.playbackRate=parseFloat(e.target.value);
-  };
-
-  // ===== POPUNDER LIMIT =====
-  const last = localStorage.getItem("ad_time")||0;
-  if(Date.now()-last>30*60*1000){
-    localStorage.setItem("ad_time",Date.now());
-    (function(s){
-      s.dataset.zone='10109877';
-      s.src='https://al5sm.com/tag.min.js';
-    })(document.body.appendChild(document.createElement('script')));
-  }
 }
-
-// ===== ANTI INSPECT =====
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
-  if(e.key==="F12"||(e.ctrlKey&&e.shiftKey)|| (e.ctrlKey&&e.key==="u"))
-    e.preventDefault();
-});
 </script>
 
 </body>
