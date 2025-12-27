@@ -3,42 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Premium Stream</title>
+<title>Player</title>
 
 <style>
 :root{
-  --bg:#060717;
-  --panel:#0b1026;
-  --glass:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.08);
+  --bg:#050812;
+  --panel:#0b1226;
   --muted:#9fb0c0;
   --accent:#4f8cff;
-  --radius:14px;
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui,Inter,Arial;
   background:linear-gradient(180deg,#020617,#071129);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
   color:#eaf4ff;
 }
-
-.wrapper{
-  max-width:900px;
-  margin:auto;
-  padding:16px;
+.wrap{
+  max-width:920px;
+  margin:20px auto;
+  padding:12px;
 }
-
 .card{
-  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.1));
-  border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.15));
+  border-radius:16px;
   overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
 }
-
-/* ===== VIDEO ===== */
-.video-wrap{
+.player{
   position:relative;
   background:#000;
 }
@@ -47,30 +39,22 @@ video{
   max-height:70vh;
   display:block;
 }
-
-/* play overlay */
 .overlay{
   position:absolute;
   inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:radial-gradient(circle at center,rgba(0,0,0,.4),rgba(0,0,0,.8));
 }
-.overlay.hidden{display:none}
 .play-btn{
-  width:86px;height:86px;
-  border-radius:50%;
-  border:1px solid var(--border);
   background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;
+  padding:14px 22px;
+  border-radius:999px;
+  font-weight:700;
   cursor:pointer;
 }
-.play-btn svg{width:38px;height:38px;stroke:#fff}
-
-/* ===== META ===== */
 .meta{
   padding:14px;
 }
@@ -78,201 +62,118 @@ video{
   font-size:20px;
   font-weight:800;
 }
-.stats{
-  display:flex;
-  gap:14px;
-  margin-top:6px;
+.sub{
   font-size:13px;
   color:var(--muted);
+  margin-top:4px;
 }
-.stat{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.stat svg{width:14px;height:14px;stroke:var(--muted)}
-
-/* ===== ACTION ===== */
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+.full{
   padding:14px;
+  border-top:1px solid rgba(255,255,255,.06);
 }
-.btn{
-  padding:12px;
-  border-radius:12px;
-  background:var(--glass);
-  border:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  color:#fff;
-  cursor:pointer;
-}
-.btn.primary{
-  background:linear-gradient(90deg,var(--accent),#2aa0ff);
-  border:0;
-}
-.btn svg{width:18px;height:18px;stroke:#fff}
-
-/* ===== FULL MODAL ===== */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  display:none;
-  align-items:flex-end;
-}
-.modal.show{display:flex}
-.sheet{
-  width:100%;
-  background:var(--panel);
-  border-radius:18px 18px 0 0;
-  padding:18px;
-  animation:up .3s ease;
-}
-@keyframes up{from{transform:translateY(100%)}to{transform:none}}
-
-.full-link{
-  display:block;
-  margin-top:10px;
-  padding:14px;
-  border-radius:12px;
-  background:var(--glass);
-  border:1px solid var(--border);
+.full a{
+  display:inline-block;
+  margin:6px 6px 0 0;
+  padding:8px 12px;
+  border-radius:10px;
+  background:rgba(255,255,255,.05);
   color:#fff;
   text-decoration:none;
+  font-size:14px;
 }
-
-/* responsive */
-@media(max-width:520px){
-  .actions{grid-template-columns:1fr}
+.error{
+  padding:40px;
+  text-align:center;
+  color:#ff9a9a;
 }
 </style>
 </head>
 
 <body>
-<div class="wrapper">
+<div class="wrap">
   <div class="card">
-
-    <div class="video-wrap">
-      <video id="video" preload="metadata" playsinline></video>
+    <div class="player">
+      <video id="video" playsinline></video>
       <div class="overlay" id="overlay">
-        <div class="play-btn" id="playBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-            <polygon points="6,4 20,12 6,20"/>
-          </svg>
-        </div>
+        <button class="play-btn" id="playBtn">PLAY</button>
       </div>
     </div>
 
     <div class="meta">
-      <div class="title">Premium Stream</div>
-      <div class="stats">
-        <div class="stat">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-          </svg>
-          <span id="views">0 views</span>
-        </div>
-        <div class="stat">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          <span id="online">0 online</span>
-        </div>
-      </div>
+      <div class="title" id="title">Loading…</div>
+      <div class="sub" id="sub"></div>
     </div>
 
-    <div class="actions">
-      <div class="btn primary" id="fullBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-          <path d="M4 4h16v16H4z"/>
-        </svg>
-        Full Konten
-      </div>
-      <div class="btn" id="shareBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-          <circle cx="18" cy="5" r="3"/>
-          <circle cx="6" cy="12" r="3"/>
-          <circle cx="18" cy="19" r="3"/>
-          <path d="M8.5 13.5l7-3.5M8.5 10.5l7 3.5"/>
-        </svg>
-        Share
-      </div>
-    </div>
-
+    <div class="full" id="fullLinks"></div>
   </div>
 </div>
-
-<!-- FULL MODAL -->
-<div class="modal" id="modal">
-  <div class="sheet">
-    <b>Full Konten</b>
-    <a class="full-link" href="https://1024terabox.com/s/XXXX" target="_blank">Terabox Premium</a>
-  </div>
-</div>
-
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  authDomain: "stream-counter-b13fc.firebaseapp.com",
-  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "stream-counter-b13fc"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const VIDEO_ID = "video-001";
-const video = document.getElementById('video');
-video.src = "https://cdn.videy.co/XXXX.mp4";
-
-/* views */
-const viewsRef = ref(db, `stream/${VIDEO_ID}/views`);
-runTransaction(viewsRef, v => (v||0)+1);
-onValue(viewsRef,s=>views.textContent=(s.val()||0)+" views");
-
-/* online */
-const session = Date.now().toString();
-const onlineRef = ref(db, `stream/${VIDEO_ID}/online/${session}`);
-set(onlineRef, Date.now());
-onDisconnect(onlineRef).remove();
-
-onValue(ref(db,`stream/${VIDEO_ID}/online`),s=>{
-  online.textContent=(s.exists()?Object.keys(s.val()).length:0)+" online";
-});
-</script>
 
 <script>
-const overlay=document.getElementById('overlay');
-const playBtn=document.getElementById('playBtn');
-const modal=document.getElementById('modal');
+const q = new URLSearchParams(location.search);
+const vid = q.get("v");
 
-playBtn.onclick=()=>{
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const playBtn = document.getElementById("playBtn");
+const titleEl = document.getElementById("title");
+const subEl = document.getElementById("sub");
+const fullEl = document.getElementById("fullLinks");
+
+if(!vid){
+  document.querySelector(".card").innerHTML =
+    '<div class="error">Video ID tidak ditemukan</div>';
+  throw "";
+}
+
+fetch("videos.json")
+  .then(r=>r.json())
+  .then(db=>{
+    const data = db[vid];
+    if(!data){
+      document.querySelector(".card").innerHTML =
+        '<div class="error">Video tidak tersedia</div>';
+      return;
+    }
+
+    titleEl.textContent = data.title || "";
+    subEl.textContent = data.subtitle || "";
+    video.src = data.src;
+
+    fullEl.innerHTML = "";
+    (data.full||[]).forEach(f=>{
+      const a=document.createElement("a");
+      a.href=f.url;
+      a.target="_blank";
+      a.rel="nofollow noopener";
+      a.textContent=f.label;
+      fullEl.appendChild(a);
+    });
+  });
+
+playBtn.onclick = ()=>{
   video.play();
-  overlay.classList.add('hidden');
+  overlay.style.display="none";
 };
-video.onclick=()=>video.paused?video.play():video.pause();
-video.onpause=()=>overlay.classList.remove('hidden');
 
-fullBtn.onclick=()=>modal.classList.add('show');
-modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};
-
-shareBtn.onclick=()=>{
-  navigator.clipboard.writeText(location.href);
-  alert("Link disalin");
+video.onclick = ()=>{
+  if(video.paused){
+    video.play();
+    overlay.style.display="none";
+  }else{
+    video.pause();
+    overlay.style.display="";
+  }
 };
 </script>
 
 <!-- POPUNDER -->
-<script>(function(s){s.dataset.zone='10109877',s.src='https://al5sm.com/tag.min.js'})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script>
+(function(s){
+  s.dataset.zone='10109877';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement, document.body].filter(Boolean).pop()
+  .appendChild(document.createElement('script')));
+</script>
 
 </body>
 </html>
