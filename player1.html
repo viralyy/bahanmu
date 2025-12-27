@@ -11,113 +11,64 @@
   --card:#111528;
   --muted:#9aa4c7;
   --accent:#4f8cff;
-  --radius:14px;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   background:linear-gradient(180deg,#060816,#0b0d17);
-  font-family:system-ui,Segoe UI,Roboto,Arial;
+  font-family:system-ui,Segoe UI,Roboto;
   color:#eef2ff
 }
-.wrap{
-  max-width:900px;
-  margin:24px auto;
-  padding:12px
-}
+.wrap{max-width:900px;margin:24px auto;padding:12px}
 .card{
   background:var(--card);
-  border-radius:var(--radius);
+  border-radius:14px;
   overflow:hidden;
   box-shadow:0 20px 40px rgba(0,0,0,.45)
 }
-
-/* ===== VIDEO ===== */
-.video-box{
-  position:relative;
-  background:#000
-}
-video{
-  width:100%;
-  display:block;
-  max-height:70vh;
-  background:#000
-}
+.video-box{position:relative;background:#000}
+video{width:100%;max-height:70vh;background:#000}
 .watermark{
-  position:absolute;
-  right:14px;
-  bottom:14px;
-  opacity:.5;
-  pointer-events:none
+  position:absolute;right:14px;bottom:14px;
+  opacity:.55;pointer-events:none
 }
-
-/* ===== TOP INFO ===== */
-.info{
-  padding:14px
-}
-.title{
-  font-size:20px;
-  font-weight:800
-}
+.info{padding:14px}
+.title{font-size:20px;font-weight:800}
 .stats{
-  margin-top:6px;
-  display:flex;
-  gap:16px;
-  font-size:13px;
-  color:var(--muted)
+  display:flex;gap:16px;
+  font-size:13px;color:var(--muted);margin-top:6px
+}
+.online-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#22c55e;display:inline-block;
+  animation:pulse 1s infinite
+}
+@keyframes pulse{
+  0%,100%{opacity:.3}
+  50%{opacity:1}
 }
 
-/* ===== CONTROLS ===== */
 .controls{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px;
-  border-top:1px solid rgba(255,255,255,.05)
+  display:flex;gap:10px;align-items:center;
+  padding:12px;border-top:1px solid rgba(255,255,255,.05)
 }
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 12px;
-  background:#1a1f3d;
-  border-radius:10px;
-  cursor:pointer;
-  user-select:none
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:10px;
+  background:#1a1f3d;cursor:pointer
 }
-.btn.primary{
-  background:linear-gradient(135deg,#4f8cff,#2dd4ff)
-}
-.range{
-  flex:1
-}
-input[type=range]{
-  width:100%
-}
+.btn.primary{background:linear-gradient(135deg,#4f8cff,#2dd4ff)}
+.range{flex:1}
+input[type=range]{width:100%}
+select{background:#1a1f3d;color:#fff;border:none;border-radius:8px;padding:6px}
 
-/* ===== FULL LINKS ===== */
-.section{
-  padding:14px
-}
-.section h3{
-  margin:0 0 8px;
-  font-size:16px
-}
-.links{
-  display:grid;
-  gap:8px
-}
+.section{padding:14px}
+.links{display:grid;gap:8px}
 .link{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px;
-  background:#151a35;
-  border-radius:10px;
-  text-decoration:none;
-  color:#eef2ff
+  display:flex;gap:10px;align-items:center;
+  padding:10px;background:#151a35;
+  border-radius:10px;color:#fff;text-decoration:none
 }
-.link:hover{background:#1b2250}
 svg{width:18px;height:18px;fill:#fff}
 </style>
 </head>
@@ -125,71 +76,57 @@ svg{width:18px;height:18px;fill:#fff}
 <body>
 
 <div class="wrap">
-  <div class="card">
+<div class="card">
 
-    <!-- VIDEO -->
-    <div class="video-box">
-      <video id="video" playsinline preload="metadata"></video>
+<div class="video-box">
+  <video id="video" playsinline preload="metadata"></video>
+  <svg class="watermark" width="90" height="24" viewBox="0 0 120 30">
+    <text x="0" y="20" font-size="16" fill="#fff">STREAM+</text>
+  </svg>
+</div>
 
-      <!-- watermark -->
-      <svg class="watermark" width="90" height="24" viewBox="0 0 120 30">
-        <text x="0" y="20" font-size="16" fill="#fff">STREAM+</text>
-      </svg>
-    </div>
-
-    <!-- INFO -->
-    <div class="info">
-      <div class="title" id="title">Loading...</div>
-      <div class="stats">
-        <div id="views">0 views</div>
-        <div id="today">0 today</div>
-      </div>
-    </div>
-
-    <!-- CONTROLS -->
-    <div class="controls">
-      <div class="btn primary" id="playBtn">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        Play
-      </div>
-      <div class="range">
-        <input id="seek" type="range" min="0" max="100" value="0">
-      </div>
-      <div class="btn" id="fsBtn">
-        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
-      </div>
-    </div>
-
-    <!-- FULL CONTENT -->
-    <div class="section">
-      <h3>Full Konten</h3>
-      <div class="links" id="fullLinks"></div>
-    </div>
-
+<div class="info">
+  <div class="title" id="title">Loading…</div>
+  <div class="stats">
+    <div id="views">0 views</div>
+    <div><span class="online-dot"></span> <span id="online">0 online</span></div>
   </div>
 </div>
 
-<!-- ================= DATA ================= -->
-<script>
-const DATA = {
-  title: "Contoh Video",
-  src: "https://cdn.videy.co/2OkmEh8x2.mov",
-  full: [
-    {label:"Terabox Full", url:"https://1024terabox.com/s/xxxxx"},
-    {label:"UC Share", url:"https://uc-share.com/s/xxxxx"},
-    {label:"Mirror Backup", url:"https://example.com"}
-  ]
-};
-</script>
+<div class="controls">
+  <div class="btn primary" id="playBtn">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    Play
+  </div>
+
+  <div class="range">
+    <input id="seek" type="range" min="0" max="100" value="0">
+  </div>
+
+  <select id="speed">
+    <option value="0.75">0.75x</option>
+    <option value="1" selected>1x</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+    <option value="2">2x</option>
+  </select>
+</div>
+
+<div class="section">
+  <h3>Full Konten</h3>
+  <div class="links" id="fullLinks"></div>
+</div>
+
+</div>
+</div>
 
 <!-- ================= FIREBASE ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  authDomain: "stream-counter-b13fc.firebaseapp.com",
   databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "stream-counter-b13fc",
   appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
@@ -198,61 +135,67 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const id = new URLSearchParams(location.search).get("v") || "global";
-const todayKey = new Date().toISOString().slice(0,10);
+const vid = new URLSearchParams(location.search).get("v") || "global";
 
-// total views
-runTransaction(ref(db,`views/${id}/total`),v=>(v||0)+1)
-.then(r=>document.getElementById("views").textContent=r.snapshot.val()+" views");
+/* views */
+runTransaction(ref(db,`views/${vid}`),v=>(v||0)+1)
+.then(r=>views.textContent=r.snapshot.val()+" views");
 
-// today
-runTransaction(ref(db,`views/${id}/today/${todayKey}`),v=>(v||0)+1)
-.then(r=>document.getElementById("today").textContent=r.snapshot.val()+" today");
+/* online realtime */
+const onlineRef = ref(db,`online/${vid}`);
+runTransaction(onlineRef,v=>(v||0)+1);
+onValue(onlineRef,s=>online.textContent=s.val()+" online");
+window.addEventListener("beforeunload",()=>runTransaction(onlineRef,v=>Math.max((v||1)-1,0)));
 </script>
 
-<!-- ================= PLAYER LOGIC ================= -->
+<!-- ================= PLAYER + JSON ================= -->
 <script>
 const v=document.getElementById("video");
 const playBtn=document.getElementById("playBtn");
 const seek=document.getElementById("seek");
+const speed=document.getElementById("speed");
 
-document.getElementById("title").textContent=DATA.title;
-v.src=DATA.src;
+const id=new URLSearchParams(location.search).get("v");
+fetch("videos.json?_="+Date.now())
+.then(r=>r.json())
+.then(j=>{
+  if(!j[id])return;
+  const d=j[id];
+  title.textContent=d.title;
+  v.src=d.src;
 
-v.addEventListener("loadedmetadata",()=>{
-  seek.max=v.duration;
+  d.full.forEach(f=>{
+    const a=document.createElement("a");
+    a.className="link";
+    a.href=f.url;
+    a.target="_blank";
+    a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/></svg>${f.label}`;
+    a.onclick=e=>adGate(e,f.url);
+    fullLinks.appendChild(a);
+  });
 });
-v.addEventListener("timeupdate",()=>{
-  seek.value=v.currentTime;
-});
+
+v.onloadedmetadata=()=>seek.max=v.duration;
+v.ontimeupdate=()=>seek.value=v.currentTime;
 seek.oninput=()=>v.currentTime=seek.value;
+speed.onchange=()=>v.playbackRate=speed.value;
 
-playBtn.onclick=()=>{
-  if(v.paused){v.play();playBtn.innerHTML=playBtn.innerHTML.replace("Play","Pause")}
-  else{v.pause();playBtn.innerHTML=playBtn.innerHTML.replace("Pause","Play")}
-};
+playBtn.onclick=()=>v.paused?v.play():v.pause();
 
-document.getElementById("fsBtn").onclick=()=>{
-  v.requestFullscreen?.();
-};
-
-// full links + redirect 1x
-const box=document.getElementById("fullLinks");
-DATA.full.forEach(f=>{
-  const a=document.createElement("a");
-  a.className="link";
-  a.href=f.url;
-  a.target="_blank";
-  a.onclick=e=>{
-    if(!localStorage.getItem("ad_done")){
-      e.preventDefault();
-      localStorage.setItem("ad_done","1");
-      location.href="https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416";
-    }
-  };
-  a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/></svg>${f.label}`;
-  box.appendChild(a);
-});
+/* ===== IKLAN MAX 3x / 30 MENIT ===== */
+function adGate(e,url){
+  const k="ad_hits";
+  let d=JSON.parse(localStorage.getItem(k)||"[]");
+  const now=Date.now();
+  d=d.filter(t=>now-t<30*60*1000);
+  if(d.length<3){
+    e.preventDefault();
+    d.push(now);
+    localStorage.setItem(k,JSON.stringify(d));
+    location.href="https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416";
+    setTimeout(()=>location.href=url,1200);
+  }
+}
 </script>
 
 <!-- ================= POPUNDER ================= -->
@@ -261,6 +204,14 @@ DATA.full.forEach(f=>{
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+</script>
+
+<!-- ================= ANTI INSPECT (SOFT) ================= -->
+<script>
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("keydown",e=>{
+  if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();
+});
 </script>
 
 </body>
