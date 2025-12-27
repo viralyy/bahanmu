@@ -172,7 +172,7 @@ const speedSel = document.getElementById("speed");
 let list=[], idx=0;
 
 /* ===== LOAD JSON ===== */
-fetch("data.json")
+fetch("videos.json")
 .then(r=>{
   if(!r.ok) throw "FETCH FAIL";
   return r.json();
