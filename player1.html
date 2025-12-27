@@ -24,19 +24,24 @@ body{
 .card{
   background:linear-gradient(180deg,#0b1020,#060814);
   border-radius:14px;
-  padding:12px;
+  padding:14px;
 }
 .hidden{display:none}
 
 h1{font-size:18px;margin:6px 0}
 .stats{
-  display:flex;gap:14px;font-size:12px;color:var(--muted)
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  color:var(--muted);
 }
 .online{display:flex;align-items:center;gap:6px}
 .dot{
   width:8px;height:8px;border-radius:50%;
-  background:#22ff00;opacity:.25;
+  background:#22ff00;
+  opacity:.25;
   box-shadow:0 0 6px #22ff00;
+  transition:.3s;
 }
 .dot.on{opacity:1}
 
@@ -45,13 +50,17 @@ video{
   border-radius:12px;
   background:#000;
   margin-top:10px;
-  opacity:0;transform:scale(.98);
+  opacity:0;
+  transform:scale(.98);
   transition:.4s ease;
 }
 video.ready{opacity:1;transform:scale(1)}
 
 .controls{
-  display:flex;gap:8px;margin-top:10px;flex-wrap:wrap
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
 }
 .btn{
   background:#111827;
@@ -74,7 +83,21 @@ select{
   padding:6px;
 }
 
-/* FULL KONTEN POPUP */
+/* FULL KONTEN BUTTON */
+.full-btn{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  font-size:15px;
+  font-weight:600;
+  border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  border:0;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* POPUP */
 .popup{
   position:fixed;
   inset:0;
@@ -85,25 +108,20 @@ select{
   pointer-events:none;
   transition:.3s;
 }
-.popup.show{
-  opacity:1;
-  pointer-events:auto;
-}
+.popup.show{opacity:1;pointer-events:auto}
 .popup-box{
   width:100%;
   background:#0b1020;
-  border-radius:14px 14px 0 0;
+  border-radius:16px 16px 0 0;
   padding:16px;
   transform:translateY(40px);
   transition:.3s;
 }
-.popup.show .popup-box{
-  transform:translateY(0);
-}
+.popup.show .popup-box{transform:translateY(0)}
 .popup-box a{
   display:block;
-  margin-top:8px;
-  padding:10px;
+  margin-top:10px;
+  padding:12px;
   border-radius:10px;
   background:#111827;
   border:1px solid #1f2937;
@@ -139,21 +157,23 @@ select{
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
       </select>
-      <button id="openFull" class="btn">Full Konten</button>
     </div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
 
   </div>
 </div>
 
-<!-- FULL KONTEN POPUP -->
 <div id="popup" class="popup">
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import {
+  getDatabase, ref, runTransaction,
+  onValue, set, onDisconnect
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
@@ -166,14 +186,15 @@ const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 
 const vid = new URLSearchParams(location.search).get("v");
+
 fetch("videos.json?_="+Date.now())
 .then(r=>r.json())
 .then(data=>{
   if(!vid || !data[vid]) return;
-  start(data[vid]);
+  initPlayer(data[vid]);
 });
 
-function start(video){
+function initPlayer(video){
   const app=document.getElementById("app");
   app.classList.remove("hidden");
 
@@ -187,12 +208,11 @@ function start(video){
 
   player.onloadeddata=()=>player.classList.add("ready");
 
-  // CONTROLS
   document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
   document.getElementById("mute").onclick=()=>player.muted=!player.muted;
   document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  // FULL POPUP
+  // FULL KONTEN
   const popup=document.getElementById("popup");
   const box=document.getElementById("popupBox");
   document.getElementById("openFull").onclick=()=>{
@@ -206,13 +226,13 @@ function start(video){
   };
   popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
 
-  // VIEWS
+  // VIEWS (FIX NUMBER)
   const vRef=ref(db,"views/"+vid);
-  runTransaction(vRef,n=>(n||0)+1);
-  onValue(vRef,s=>viewsEl.textContent=s.val()+" views");
+  runTransaction(vRef,cur=> (parseInt(cur)||0)+1);
+  onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
 
-  // ONLINE
-  const sid=Date.now()+"_"+Math.random();
+  // ONLINE (FIX STABLE)
+  const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
   const oRef=ref(db,"online/"+vid+"/"+sid);
   set(oRef,true);
   onDisconnect(oRef).remove();
