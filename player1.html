@@ -1,169 +1,251 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Player</title>
 
 <style>
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:#0b0b0b;
-  color:#f2f2f2;
-  font-family:system-ui,-apple-system,sans-serif
+  font-family:system-ui,Arial;
+  background:#060717;
+  color:#fff;
 }
-.wrapper{
-  max-width:520px;
+.wrap{
+  max-width:1000px;
   margin:auto;
-  padding:16px
+  padding:14px;
 }
-h1{font-size:18px;margin:6px 0}
-p{font-size:13px;color:#aaa;margin:0 0 10px}
-.video-box{position:relative}
+.card{
+  background:#0b1228;
+  border-radius:14px;
+  overflow:hidden;
+}
+.video-box{
+  position:relative;
+  background:#000;
+}
 video{
   width:100%;
-  border-radius:14px;
-  background:#000
+  max-height:70vh;
+  background:#000;
+}
+.play-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.play-btn{
+  background:#1e90ff;
+  border:none;
+  border-radius:999px;
+  padding:16px 28px;
+  font-size:18px;
+  color:#fff;
+  cursor:pointer;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:10px;
+}
+.btn{
+  background:#121a3a;
+  border:none;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.meta{
+  padding:12px;
+}
+.title{
+  font-size:20px;
+  font-weight:800;
+}
+.subtitle{
+  color:#9fb0c0;
+  font-size:13px;
+  margin-top:4px;
 }
 .stats{
   display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  margin:8px 0
-}
-.online{
-  display:flex;
-  align-items:center;
-  gap:6px
+  gap:14px;
+  margin-top:8px;
+  font-size:13px;
 }
 .dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#00ff6a;
-  animation:pulse 1.2s infinite
+  width:8px;height:8px;border-radius:50%;
+  background:#2aff2a;
+  animation:pulse 1.5s infinite;
 }
 @keyframes pulse{
-  0%{opacity:.3}
+  0%{opacity:.2}
   50%{opacity:1}
-  100%{opacity:.3}
+  100%{opacity:.2}
 }
-.btn{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-  margin-top:12px;
+.full{
   padding:12px;
-  border-radius:14px;
-  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+}
+.full h3{margin:0 0 8px}
+.full a{
+  display:inline-block;
+  margin:4px 6px 0 0;
+  padding:8px 12px;
+  background:#121a3a;
+  border-radius:10px;
   color:#fff;
   text-decoration:none;
-  font-weight:600
 }
-.hidden{display:none}
-svg{width:18px;height:18px;fill:#fff}
 .error{
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center
+  padding:40px;
+  text-align:center;
+  color:#ff6b6b;
 }
 </style>
 </head>
 
 <body>
+<div class="wrap">
+  <div class="card">
 
-<div class="wrapper hidden" id="app">
-  <h1 id="title"></h1>
-  <p id="subtitle"></p>
-
-  <div class="stats">
-    <div id="views">0 views</div>
-    <div class="online">
-      <div class="dot"></div>
-      <span id="online">0 online</span>
+    <div class="video-box">
+      <video id="video" controls playsinline></video>
+      <div class="play-overlay" id="overlay">
+        <button class="play-btn" id="playBtn">PLAY</button>
+      </div>
     </div>
-  </div>
 
-  <div class="video-box">
-    <video id="video" controls playsinline></video>
-  </div>
+    <div class="controls">
+      <button class="btn" id="prev">Prev</button>
+      <button class="btn" id="next">Next</button>
+      <select class="btn" id="speed">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
 
-  <a id="fullBtn" class="btn" target="_blank">
-    <svg viewBox="0 0 24 24">
-      <path d="M5 5h6v2H7v4H5V5zm14 0v6h-2V7h-4V5h6zm-6 14v-2h4v-4h2v6h-6zm-8-6h2v4h4v2H5v-6z"/>
-    </svg>
-    Buka Full Konten
-  </a>
+    <div class="meta">
+      <div class="title" id="title">-</div>
+      <div class="subtitle" id="subtitle">-</div>
+      <div class="stats">
+        <div>👁 <span id="views">Live</span></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="dot"></div> User online
+        </div>
+      </div>
+    </div>
+
+    <div class="full">
+      <h3>Full Konten</h3>
+      <div id="fullLinks"></div>
+    </div>
+
+  </div>
 </div>
 
-<div class="error hidden" id="error">
-  <h2>KONTEN TIDAK TERSEDIA</h2>
-</div>
+<script>
+/* ===== ANTI ERROR CORE ===== */
+const params = new URLSearchParams(location.search);
+const id = params.get("v");
+if(!id){
+  document.body.innerHTML='<div class="error">ID TIDAK ADA</div>';
+  throw new Error("NO ID");
+}
+
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const playBtn = document.getElementById("playBtn");
+const titleEl = document.getElementById("title");
+const subtitleEl = document.getElementById("subtitle");
+const fullLinksEl = document.getElementById("fullLinks");
+const speedSel = document.getElementById("speed");
+
+let list=[], idx=0;
+
+/* ===== LOAD JSON ===== */
+fetch("data.json")
+.then(r=>{
+  if(!r.ok) throw "FETCH FAIL";
+  return r.json();
+})
+.then(data=>{
+  const d = data[id];
+  if(!d) throw "ID NOT FOUND";
+
+  titleEl.textContent = d.title || "-";
+  subtitleEl.textContent = d.subtitle || "";
+
+  if(!Array.isArray(d.videos) || !d.videos.length)
+    throw "NO VIDEO";
+
+  list = d.videos;
+  video.src = list[0];
+
+  // full links
+  fullLinksEl.innerHTML="";
+  if(Array.isArray(d.full_links)){
+    d.full_links.forEach(l=>{
+      const a=document.createElement("a");
+      a.href=l.url;
+      a.target="_blank";
+      a.textContent=l.label;
+      fullLinksEl.appendChild(a);
+    });
+  }
+})
+.catch(e=>{
+  console.error(e);
+  document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
+});
+
+/* ===== PLAYER ===== */
+playBtn.onclick=()=>{
+  video.play();
+  overlay.style.display="none";
+};
+video.onclick=()=>{
+  if(video.paused){video.play();overlay.style.display="none";}
+  else video.pause();
+};
+video.onpause=()=>overlay.style.display="";
+video.onended=()=>next();
+
+document.getElementById("prev").onclick=()=>{
+  if(!list.length) return;
+  idx = idx>0?idx-1:list.length-1;
+  video.src=list[idx]; video.play();
+};
+function next(){
+  if(!list.length) return;
+  idx = idx<list.length-1?idx+1:0;
+  video.src=list[idx]; video.play();
+}
+document.getElementById("next").onclick=next;
+
+speedSel.onchange=()=>video.playbackRate=Number(speedSel.value);
+
+/* ===== ANTI INSPECT RINGAN ===== */
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.onkeydown=e=>{
+  if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();
+};
+</script>
 
 <!-- POPUNDER -->
 <script>
 (function(s){
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop()
-  .appendChild(document.createElement('script')));
-</script>
-
-<script>
-(async()=>{
-  const q=new URLSearchParams(location.search);
-  const id=(q.get("v")||"").trim();
-
-  if(!id){showError();return;}
-
-  let data;
-  try{
-    const r=await fetch("data.json",{cache:"no-store"});
-    if(!r.ok)throw 0;
-    data=await r.json();
-  }catch(e){showError();return;}
-
-  const item=data[id];
-  if(!item){showError();return;}
-
-  // inject
-  document.getElementById("title").textContent=item.title||"-";
-  document.getElementById("subtitle").textContent=item.subtitle||"";
-  document.getElementById("video").src=item.video||"";
-  document.getElementById("fullBtn").href=item.full_link||"#";
-
-  // views (local)
-  const vk="views_"+id;
-  let v=+localStorage.getItem(vk)||0;
-  localStorage.setItem(vk,++v);
-  document.getElementById("views").textContent=v+" views";
-
-  // online fake
-  setInterval(()=>{
-    document.getElementById("online").textContent=
-      (Math.floor(Math.random()*20)+5)+" online";
-  },3000);
-
-  document.getElementById("app").classList.remove("hidden");
-
-  function showError(){
-    document.getElementById("error").classList.remove("hidden");
-  }
-})();
-</script>
-
-<!-- ANTI INSPECT BASIC -->
-<script>
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
-  if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&"IJS".includes(e.key))){
-    e.preventDefault();
-  }
-});
+})(document.body.appendChild(document.createElement('script')));
 </script>
 
 </body>
