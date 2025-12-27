@@ -2,18 +2,18 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Stream Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium Stream</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
 :root{
-  --bg:#0c0c0f;
-  --card:#15151b;
-  --soft:#1e1e26;
-  --text:#f1f1f1;
-  --muted:#9a9aa2;
+  --bg:#0b0c10;
+  --card:#14151c;
+  --soft:#1d1f29;
   --accent:#ff2f6d;
-  --radius:16px;
+  --text:#f1f1f1;
+  --muted:#9aa0b3;
+  --radius:18px;
 }
 
 *{box-sizing:border-box}
@@ -26,37 +26,38 @@ body{
 }
 
 .wrapper{
-  max-width:460px;
+  max-width:480px;
   margin:auto;
   padding:16px;
 }
 
 /* ===== VIDEO ===== */
-.video-card{
+.player{
+  position:relative;
   background:#000;
   border-radius:var(--radius);
   overflow:hidden;
-  position:relative;
 }
 
 video{
   width:100%;
   display:block;
   opacity:0;
-  transform:scale(.98);
+  transform:scale(.97);
   transition:.4s ease;
 }
-video.ready{
-  opacity:1;
-  transform:scale(1);
-}
+video.ready{opacity:1;transform:scale(1)}
 
-.watermark{
-  position:absolute;
-  bottom:12px;
-  right:12px;
-  opacity:.6;
+.cinema{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:999;
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
+.cinema video{max-width:100%;max-height:100%}
 
 /* ===== META ===== */
 .meta{
@@ -66,24 +67,20 @@ video.ready{
   margin-top:14px;
 }
 
-.title{
-  font-size:16px;
-  font-weight:600;
-  margin:0 0 6px;
-}
-
+.title{font-weight:700;font-size:16px}
 .stats{
   display:flex;
-  gap:12px;
+  gap:14px;
   font-size:12px;
   color:var(--muted);
+  margin-top:6px;
 }
 
 /* ===== ACTION ===== */
 .actions{
-  margin-top:14px;
   display:grid;
   gap:10px;
+  margin-top:14px;
 }
 
 .btn{
@@ -93,145 +90,177 @@ video.ready{
   gap:10px;
   padding:14px;
   border-radius:var(--radius);
-  text-decoration:none;
-  font-weight:600;
+  font-weight:700;
   cursor:pointer;
-  user-select:none;
 }
 
-.btn-primary{
+.primary{
   background:linear-gradient(135deg,#ff2f6d,#ff5b8a);
-  color:#fff;
+}
+.soft{background:var(--soft)}
+
+svg{width:18px;height:18px;fill:currentColor}
+
+/* ===== UNLOCK ===== */
+.unlock{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-top:12px;
+  display:none;
 }
 
-.btn-soft{
-  background:var(--soft);
-  color:var(--text);
+.progress{
+  height:6px;
+  background:#222;
+  border-radius:6px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#ff2f6d,#ff7aa2);
+  transition:.3s;
 }
 
 /* ===== FULL LINKS ===== */
-.full-links{
+.full{
   display:none;
+  margin-top:12px;
   background:var(--card);
   border-radius:var(--radius);
   padding:12px;
-  margin-top:12px;
   display:grid;
   gap:10px;
 }
-
-.full-links a{
+.full a{
   background:var(--soft);
   padding:12px;
   border-radius:12px;
-  color:#fff;
   text-decoration:none;
+  color:#fff;
   text-align:center;
-  font-weight:600;
+  font-weight:700;
 }
-
-/* ===== SVG ICON ===== */
-svg{width:18px;height:18px;fill:currentColor}
 </style>
 </head>
 
 <body>
-
 <div class="wrapper">
 
   <!-- VIDEO -->
-  <div class="video-card">
-    <video id="player" controls playsinline
+  <div class="player">
+    <video id="video" controls playsinline
       src="https://cdn.videy.co/fgv29OQB1.mp4"></video>
-
-    <svg class="watermark" width="72" height="20" viewBox="0 0 120 30">
-      <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
-    </svg>
   </div>
 
   <!-- META -->
   <div class="meta">
-    <div class="title" id="title">Judul Video</div>
+    <div class="title">Premium Stream Content</div>
     <div class="stats">
       <div id="views">0 views</div>
-      <div id="today">0 dibuka hari ini</div>
+      <div id="today">0 today</div>
     </div>
   </div>
 
   <!-- ACTION -->
   <div class="actions">
-    <div class="btn btn-primary" id="openFull">
-      <svg viewBox="0 0 24 24">
-        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3z"/>
-        <path d="M5 5h5V3H3v7h2V5zm0 14v-5H3v7h7v-2H5zm14-5v5h-5v2h7v-7h-2z"/>
-      </svg>
-      Buka Full Konten
+    <div class="btn primary" id="unlockBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-7h-1V7a5 5 0 0 0-10 0v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zM9 7a3 3 0 0 1 6 0v3H9V7z"/></svg>
+      Unlock Full Konten
     </div>
 
-    <div class="btn btn-soft" id="share">
-      <svg viewBox="0 0 24 24">
-        <path d="M18 16a3 3 0 0 0-2.24 1.03L8.91 13.7a3.3 3.3 0 0 0 0-1.39l6.72-3.32A3 3 0 1 0 14 5a3 3 0 0 0 .24 1.17L7.52 9.49A3 3 0 1 0 6 15a3 3 0 0 0 1.52-.49l6.72 3.32A3 3 0 1 0 18 16z"/>
-      </svg>
-      Salin Link
+    <div class="btn soft" id="cinemaBtn">
+      <svg viewBox="0 0 24 24"><path d="M7 14h10V10H7v4zm14-9H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/></svg>
+      Cinema Mode
+    </div>
+
+    <div class="btn soft" id="shareBtn">
+      <svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.24 1.03L8.91 13.7a3.3 3.3 0 0 0 0-1.39l6.72-3.32A3 3 0 1 0 14 5a3 3 0 0 0 .24 1.17L7.52 9.49A3 3 0 1 0 6 15a3 3 0 0 0 1.52-.49l6.72 3.32A3 3 0 1 0 18 16z"/></svg>
+      Share Link
     </div>
   </div>
 
-  <!-- FULL LINKS -->
-  <div class="full-links" id="fullLinks"></div>
+  <!-- UNLOCK -->
+  <div class="unlock" id="unlockBox">
+    <div>Menyiapkan full konten…</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+
+  <!-- FULL -->
+  <div class="full" id="fullBox"></div>
 
 </div>
 
 <script>
-/* ===== VIDEO READY ===== */
-const v=document.getElementById("player");
+/* VIDEO READY */
+const v=document.getElementById("video");
 v.addEventListener("loadeddata",()=>v.classList.add("ready"));
 
-/* ===== ID ===== */
-const vid = new URLSearchParams(location.search).get("v") || "global";
+/* VIEW LOGIC (ANTI SPAM) */
+const vid="premium1";
+const now=Date.now();
+const last=+localStorage.getItem("last_"+vid)||0;
+let views=+localStorage.getItem("views_"+vid)||0;
+if(now-last>60000){views++;localStorage.setItem("views_"+vid,views);localStorage.setItem("last_"+vid,now);}
+document.getElementById("views").textContent=views+" views";
 
-/* ===== VIEWS ===== */
-let views = +localStorage.getItem("views_"+vid) || 0;
-views++;
-localStorage.setItem("views_"+vid,views);
-document.getElementById("views").textContent = views+" views";
+/* TODAY */
+const tkey="today_"+vid+new Date().toDateString();
+let today=+localStorage.getItem(tkey)||0;
+today++;localStorage.setItem(tkey,today);
+document.getElementById("today").textContent=today+" today";
 
-/* ===== TODAY ===== */
-const todayKey = "today_"+vid+"_"+new Date().toDateString();
-let today = +localStorage.getItem(todayKey) || 0;
-today++;
-localStorage.setItem(todayKey,today);
-document.getElementById("today").textContent = today+" dibuka hari ini";
+/* UNLOCK */
+const unlockBtn=document.getElementById("unlockBtn");
+const unlockBox=document.getElementById("unlockBox");
+const bar=document.getElementById("bar");
+const fullBox=document.getElementById("fullBox");
+let unlocked=false;
 
-/* ===== FULL LINKS ===== */
-const FULL = [
-  {label:"Download Full (Terabox)",url:"https://1024terabox.com/s/xxxx"},
-  {label:"Mirror Link",url:"https://example.com"}
+const LINKS=[
+ {label:"Terabox Full",url:"https://1024terabox.com/s/xxxx"},
+ {label:"Mirror Link",url:"https://example.com"}
 ];
 
-let opened=false;
-document.getElementById("openFull").onclick=()=>{
-  if(opened) return;
-  opened=true;
-
-  const box=document.getElementById("fullLinks");
-  box.style.display="grid";
-  box.innerHTML="";
-
-  FULL.forEach(l=>{
-    const a=document.createElement("a");
-    a.href=l.url;
-    a.target="_blank";
-    a.textContent=l.label;
-    box.appendChild(a);
-  });
+unlockBtn.onclick=()=>{
+ if(unlocked)return;
+ unlocked=true;
+ unlockBox.style.display="block";
+ let p=0;
+ const t=setInterval(()=>{
+   p+=5; bar.style.width=p+"%";
+   if(p>=100){
+     clearInterval(t);
+     unlockBox.style.display="none";
+     fullBox.style.display="grid";
+     LINKS.forEach(l=>{
+       const a=document.createElement("a");
+       a.href=l.url;a.target="_blank";a.textContent=l.label;
+       fullBox.appendChild(a);
+     });
+   }
+ },120);
 };
 
-/* ===== SHARE ===== */
-document.getElementById("share").onclick=()=>{
-  navigator.clipboard.writeText(location.href);
-  alert("Link berhasil disalin");
+/* CINEMA */
+document.getElementById("cinemaBtn").onclick=()=>{
+  const c=document.createElement("div");
+  c.className="cinema";
+  const vc=v.cloneNode(true);
+  vc.controls=true;vc.autoplay=true;
+  c.appendChild(vc);
+  document.body.appendChild(c);
+  c.style.display="flex";
+  c.onclick=()=>c.remove();
+};
+
+/* SHARE */
+document.getElementById("shareBtn").onclick=()=>{
+ navigator.clipboard.writeText(location.href);
+ alert("Link disalin");
 };
 </script>
-
 </body>
 </html>
