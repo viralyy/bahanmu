@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stream</title>
+
+<style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Inter,Arial;
+}
+.wrap{max-width:720px;margin:auto;padding:14px}
+.card{
+  background:linear-gradient(180deg,#0b1020,#060814);
+  border-radius:14px;
+  padding:14px;
+}
+.hidden{display:none}
+
+h1{font-size:18px;margin:6px 0}
+.stats{
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  color:var(--muted);
+}
+.online{display:flex;align-items:center;gap:6px}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#22ff00;
+  opacity:.25;
+  box-shadow:0 0 6px #22ff00;
+  transition:.3s;
+}
+.dot.on{opacity:1}
+
+video{
+  width:100%;
+  border-radius:12px;
+  background:#000;
+  margin-top:10px;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s ease;
+}
+video.ready{opacity:1;transform:scale(1)}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.btn{
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  border:0;
+}
+select{
+  background:#111827;
+  color:#fff;
+  border:1px solid #1f2937;
+  border-radius:10px;
+  padding:6px;
+}
+
+/* SEEK SLIDER */
+.seek-container{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex:1;
+}
+.seek-slider{
+  flex:1;
+  height:6px;
+  border-radius:6px;
+  background:#1f2937;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.seek-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:var(--accent);
+  cursor:pointer;
+}
+
+/* FULL KONTEN BUTTON */
+.full-btn{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  font-size:15px;
+  font-weight:600;
+  border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  border:0;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:flex-end;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+}
+.popup.show{opacity:1;pointer-events:auto}
+.popup-box{
+  width:100%;
+  background:#0b1020;
+  border-radius:16px 16px 0 0;
+  padding:16px;
+  transform:translateY(40px);
+  transition:.3s;
+}
+.popup.show .popup-box{transform:translateY(0)}
+.popup-box a{
+  display:block;
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div id="app" class="card hidden">
+
+    <h1 id="title"></h1>
+
+    <div class="stats">
+      <div id="views">0 views</div>
+      <div class="online">
+        <div id="dot" class="dot"></div>
+        <span id="onlineText">0 online</span>
+      </div>
+    </div>
+
+    <video id="player" playsinline></video>
+
+    <div class="controls">
+      <button id="play" class="btn primary">Play</button>
+      
+      <div class="seek-container">
+        <input type="range" min="0" max="100" value="0" id="seek" class="seek-slider">
+        <span id="time">0:00</span>
+      </div>
+
+      <button id="mute" class="btn">Mute</button>
+      <select id="speed">
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+        <option value="6">6x</option>
+        <option value="8">8x</option>
+        <option value="10">10x</option>
+      </select>
+
+      <button id="fullscreen" class="btn">Fullscreen</button>
+    </div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
+
+  </div>
+</div>
+
+<div id="popup" class="popup">
+  <div class="popup-box" id="popupBox"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getDatabase, ref, runTransaction,
+  onValue, set, onDisconnect
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+const vid = new URLSearchParams(location.search).get("v");
+
+fetch("videos.json?_="+Date.now())
+.then(r=>r.json())
+.then(data=>{
+  if(!vid || !data[vid]) return;
+  initPlayer(data[vid]);
+});
+
+function initPlayer(video){
+  const app=document.getElementById("app");
+  app.classList.remove("hidden");
+
+  const player=document.getElementById("player");
+  const viewsEl=document.getElementById("views");
+  const onlineEl=document.getElementById("onlineText");
+  const dot=document.getElementById("dot");
+  const seekSlider=document.getElementById("seek");
+  const timeEl=document.getElementById("time");
+
+  document.getElementById("title").textContent=video.title;
+  player.src=video.src;
+
+  player.onloadeddata=()=>player.classList.add("ready");
+
+  document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
+  document.getElementById("mute").onclick=()=>player.muted=!player.muted;
+  document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
+
+  document.getElementById("fullscreen").onclick=()=> {
+    if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen();
+  };
+
+  // SEEK BAR UPDATE
+  player.addEventListener('timeupdate',()=>{
+    const val = player.currentTime;
+    seekSlider.value = val;
+    timeEl.textContent = `${Math.floor(val/60)}:${String(Math.floor(val%60)).padStart(2,'0')}`;
+  });
+  seekSlider.addEventListener('input',()=>{
+    player.currentTime = parseFloat(seekSlider.value);
+  });
+  player.addEventListener('loadedmetadata',()=>seekSlider.max=player.duration);
+
+  // FULL KONTEN
+  const popup=document.getElementById("popup");
+  const box=document.getElementById("popupBox");
+  document.getElementById("openFull").onclick=()=>{
+    box.innerHTML="";
+    (video.downloads||[]).forEach(d=>{
+      const a=document.createElement("a");
+      a.href=d.url;a.target="_blank";a.textContent=d.label;
+      box.appendChild(a);
+    });
+    popup.classList.add("show");
+  };
+  popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
+
+  // VIEWS (FIX NUMBER)
+  const vRef=ref(db,"views/"+vid);
+  runTransaction(vRef,cur=> (parseInt(cur)||0)+1);
+  onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
+
+  // ONLINE (FIX STABLE)
+  const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
+  const oRef=ref(db,"online/"+vid+"/"+sid);
+  set(oRef,true);
+  onDisconnect(oRef).remove();
+
+  onValue(ref(db,"online/"+vid),s=>{
+    const c=s.exists()?Object.keys(s.val()).length:0;
+    onlineEl.textContent=c+" online";
+    dot.classList.toggle("on",c>0);
+  });
+}
+
+// ====== POPUNDER ======
+(function(s){
+  s.dataset.zone='10109877';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+</script>
+
+</body>
+</html>
