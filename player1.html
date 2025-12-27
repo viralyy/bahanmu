@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player</title>
+
+<style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --card:#0f1730;
+  --accent:#4f8cff;
+  --accent2:#ff7a00;
+  --text:#eaf1ff;
+  --muted:#9fb0c0;
+  --radius:14px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#040510,#070b1c);
+  color:var(--text);
+  font-family:Inter,system-ui,Arial;
+}
+
+.wrap{
+  max-width:980px;
+  margin:auto;
+  padding:16px;
+}
+
+.player-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.15));
+  border-radius:var(--radius);
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  overflow:hidden;
+}
+
+/* ================= VIDEO ================= */
+.video-box{
+  position:relative;
+  background:#000;
+}
+
+video{
+  width:100%;
+  max-height:70vh;
+  display:block;
+  background:#000;
+}
+
+/* watermark */
+.watermark{
+  position:absolute;
+  bottom:14px;
+  right:14px;
+  opacity:.6;
+  pointer-events:none;
+}
+
+/* badge */
+.badge{
+  position:absolute;
+  top:14px;
+  left:14px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:linear-gradient(90deg,#ff7a00,#ffb000);
+  color:#000;
+}
+
+/* toast */
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0c1228;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:13px;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+}
+.toast.show{opacity:1}
+
+/* ================= CONTROLS ================= */
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  padding:12px;
+  background:rgba(255,255,255,.02);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.05);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent),#2aa0ff);
+  border:none;
+}
+
+.btn.warn{
+  background:linear-gradient(90deg,#ffb800,#ff7a00);
+  border:none;
+  color:#000;
+}
+
+.range{
+  flex:1;
+  appearance:none;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+}
+.range::-webkit-slider-thumb{
+  appearance:none;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+/* ================= META ================= */
+.meta{
+  padding:12px;
+}
+.meta h1{
+  font-size:20px;
+  margin:0;
+}
+.meta p{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+/* ================= FULL LINKS ================= */
+.full{
+  padding:12px;
+}
+.full-grid{
+  display:grid;
+  gap:8px;
+}
+.full a{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.03);
+  color:#fff;
+  text-decoration:none;
+}
+
+/* modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal.show{display:flex}
+.modal-box{
+  background:var(--panel);
+  padding:18px;
+  border-radius:16px;
+  max-width:320px;
+  width:90%;
+}
+
+/* responsive */
+@media(max-width:600px){
+  .controls{gap:6px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="player-card">
+
+    <div class="video-box">
+      <span class="badge">TRENDING</span>
+
+      <video id="video" playsinline></video>
+
+      <svg class="watermark" width="90" height="24" viewBox="0 0 120 30">
+        <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
+      </svg>
+    </div>
+
+    <div class="controls">
+      <button id="play" class="btn primary">Play</button>
+      <input id="seek" type="range" class="range" min="0" max="100" value="0">
+      <button id="pip" class="btn">PiP</button>
+      <select id="speed" class="btn">
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+      </select>
+    </div>
+
+    <div class="meta">
+      <h1 id="title">Sample Video</h1>
+      <p id="stats">0 views • 0 orang buka full hari ini</p>
+    </div>
+
+    <div class="full">
+      <button id="unlock" class="btn warn" style="width:100%">
+        Buka Full Konten (5)
+      </button>
+      <div id="fullLinks" class="full-grid" style="display:none;margin-top:10px"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <p style="font-weight:700">Buka link di tab baru?</p>
+    <button id="goLink" class="btn primary" style="width:100%">Lanjutkan</button>
+  </div>
+</div>
+
+<script>
+/* ===== DATA ===== */
+const VIDEO_SRC = "https://cdn.videy.co/QbnJRJmV1.mp4";
+const FULL_LINKS = [
+  {label:"Terabox Full", url:"https://1024terabox.com/"},
+  {label:"UC Share", url:"https://uc-share.com/"}
+];
+const VID = "video1";
+/* ================= */
+
+const v = document.getElementById("video");
+v.src = VIDEO_SRC;
+
+/* resume */
+const saved = localStorage.getItem("pos_"+VID);
+if(saved) v.currentTime = saved;
+
+/* views */
+let views = +localStorage.getItem("views_"+VID) || 0;
+views++; localStorage.setItem("views_"+VID, views);
+
+/* stats */
+const todayKey = "full_"+VID+"_"+new Date().toDateString();
+let fullToday = +localStorage.getItem(todayKey) || Math.floor(Math.random()*10+5);
+document.getElementById("stats").textContent =
+  views+" views • "+fullToday+" orang buka full hari ini";
+
+/* save progress */
+setInterval(()=>localStorage.setItem("pos_"+VID, v.currentTime),3000);
+
+/* controls */
+document.getElementById("play").onclick=()=>v.paused?v.play():v.pause();
+document.getElementById("seek").oninput=e=>v.currentTime=e.target.value;
+v.ontimeupdate=()=>seek.value=v.currentTime;
+document.getElementById("speed").onchange=e=>v.playbackRate=e.target.value;
+
+/* PiP */
+document.getElementById("pip").onclick=()=>v.requestPictureInPicture?.();
+
+/* toast */
+function toast(t){
+  const el=document.getElementById("toast");
+  el.textContent=t;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2000);
+}
+
+/* unlock */
+let c=5;
+const btn=document.getElementById("unlock");
+const linksBox=document.getElementById("fullLinks");
+const timer=setInterval(()=>{
+  c--; btn.textContent="Buka Full Konten ("+c+")";
+  if(c<=0){
+    clearInterval(timer);
+    btn.textContent="Buka Full Konten";
+    btn.onclick=()=>{
+      linksBox.style.display="grid";
+      FULL_LINKS.forEach(l=>{
+        const a=document.createElement("a");
+        a.textContent=l.label;
+        a.onclick=e=>{
+          e.preventDefault();
+          localStorage.setItem(todayKey,fullToday+1);
+          window.open(l.url,"_blank");
+        };
+        linksBox.appendChild(a);
+      });
+      toast("Full konten terbuka");
+    }
+  }
+},1000);
+</script>
+
+</body>
+</html>
