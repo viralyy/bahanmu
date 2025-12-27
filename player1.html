@@ -1,242 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Player</title>
 
 <style>
-:root{
-  --bg:#05070f;
-  --panel:#0b1224;
-  --muted:#9fb0c0;
-  --accent:#4f8cff;
-}
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:linear-gradient(180deg,#020617,#071129);
-  color:#eaf4ff;
   font-family:system-ui,Arial;
+  background:#020617;
+  color:#eaf4ff
 }
-.wrapper{
+.wrap{
   max-width:900px;
-  margin:auto;
-  padding:14px;
+  margin:20px auto;
+  padding:14px
 }
 .card{
-  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.1));
+  background:#050b1f;
   border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
-}
-.video-wrap{
-  position:relative;
-  background:#000;
+  padding:14px
 }
 video{
   width:100%;
-  max-height:75vh;
-  display:block;
+  border-radius:10px;
+  background:#000
 }
-.play-overlay{
-  position:absolute;
-  inset:0;
+.top{
   display:flex;
+  justify-content:space-between;
   align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.35);
+  margin:10px 0
 }
-.play-btn{
-  background:rgba(0,0,0,.6);
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:999px;
-  padding:14px 22px;
-  cursor:pointer;
+.title{
+  font-weight:800;
+  font-size:18px
+}
+.stats{
+  font-size:13px;
+  color:#9fb0c0;
+  display:flex;
+  gap:12px
+}
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#00ff7b;
+  animation:pulse 1.5s infinite
+}
+@keyframes pulse{
+  0%{opacity:.3}
+  50%{opacity:1}
+  100%{opacity:.3}
 }
 .controls{
   display:flex;
   gap:10px;
-  align-items:center;
-  padding:12px;
+  flex-wrap:wrap;
+  margin:12px 0
 }
-.btn{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  color:#fff;
+button,select,a{
+  background:#0b1435;
+  border:1px solid #1e2a5a;
+  color:#eaf4ff;
   padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-}
-.btn.primary{
-  background:linear-gradient(90deg,var(--accent),#2aa0ff);
-  border:none;
-}
-.range{flex:1}
-.meta{
-  padding:12px;
-}
-.title{font-size:20px;font-weight:800}
-.sub{font-size:13px;color:var(--muted);margin-top:4px}
-.stats{
-  display:flex;
-  gap:16px;
-  font-size:13px;
-  margin-top:8px;
-  color:var(--muted);
-}
-.dot{
-  width:8px;height:8px;
-  border-radius:50%;
-  background:#00ff6a;
-  box-shadow:0 0 8px #00ff6a;
-  display:inline-block;
-  margin-right:6px;
-}
-.full{
-  padding:12px;
-}
-.full a{
-  display:inline-block;
-  margin-top:8px;
-  padding:10px 14px;
-  border-radius:10px;
-  background:rgba(255,255,255,.06);
-  color:#fff;
+  border-radius:8px;
   text-decoration:none;
+  cursor:pointer
 }
-.hide{display:none}
+button:hover,a:hover{background:#14206b}
+#downloads{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px
+}
+.error{
+  text-align:center;
+  padding:40px;
+  font-weight:800
+}
 </style>
 </head>
 
 <body>
-<div class="wrapper">
+<div class="wrap">
   <div class="card">
 
-    <div class="video-wrap">
-      <video id="video" playsinline></video>
-      <div class="play-overlay" id="overlay">
-        <button class="play-btn" id="playBtn">
-          ▶ PLAY
-        </button>
+    <div class="top">
+      <div class="title" id="title">Loading...</div>
+      <div class="stats">
+        <span id="views">0 views</span>
+        <span><span class="dot"></span> <span id="online">0 online</span></span>
       </div>
     </div>
 
+    <video id="player" controls playsinline></video>
+
     <div class="controls">
-      <button class="btn primary" id="toggle">Play</button>
-      <input type="range" id="seek" class="range" min="0" value="0">
-      <select id="speed" class="btn">
+      <select id="speed">
+        <option value="0.5">0.5x</option>
         <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
       </select>
+      <button id="fs">Fullscreen</button>
     </div>
 
-    <div class="meta">
-      <div class="title" id="title">Loading…</div>
-      <div class="sub" id="sub"></div>
-      <div class="stats">
-        <div id="views"></div>
-        <div><span class="dot"></span><span id="online"></span></div>
-      </div>
-    </div>
-
-    <div class="full" id="fullBox"></div>
+    <div id="downloads"></div>
 
   </div>
 </div>
 
 <script>
-/* ================= CORE ================= */
-const id = new URLSearchParams(location.search).get("v");
-if(!id){ document.body.innerHTML="NO ID"; }
+(async()=>{
+  const qs = new URLSearchParams(location.search);
+  const id = qs.get("v");
+  if(!id){
+    document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
+    return;
+  }
 
-/* VIEWS (real per session) */
-const vKey = "views_"+id;
-let views = Number(localStorage.getItem(vKey)||0)+1;
-localStorage.setItem(vKey,views);
+  let json;
+  try{
+    const res = await fetch("./data.json",{cache:"no-store"});
+    json = await res.json();
+  }catch(e){
+    document.body.innerHTML='<div class="error">GAGAL LOAD DATA</div>';
+    return;
+  }
 
-/* ONLINE (session alive) */
-const onlineEl = document.getElementById("online");
-setInterval(()=>{
-  onlineEl.textContent = "User online";
-},3000);
+  const data = json[id];
+  if(!data){
+    document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
+    return;
+  }
 
-/* FETCH DATA */
-fetch("data.json")
-.then(r=>r.json())
-.then(db=>{
-  const item = db[id];
-  if(!item) throw "NOT FOUND";
-  init(item);
-})
-.catch(()=>{
-  document.body.innerHTML="KONTEN TIDAK TERSEDIA";
-});
+  // title
+  document.getElementById("title").textContent = data.title || "";
 
-function init(d){
-  const video = document.getElementById("video");
-  const overlay = document.getElementById("overlay");
+  // video
+  const video = document.getElementById("player");
+  video.src = data.videos[0];
+  video.load();
 
-  video.src = d.videos[0];
-  document.getElementById("title").textContent = d.title;
-  document.getElementById("sub").textContent = d.subtitle || "";
-  document.getElementById("views").textContent = views+" views";
+  // speed
+  document.getElementById("speed").onchange = e=>{
+    video.playbackRate = Number(e.target.value);
+  };
 
-  const full = document.getElementById("fullBox");
-  full.innerHTML = "";
-  d.full.forEach(f=>{
+  // fullscreen
+  document.getElementById("fs").onclick = ()=>{
+    if(video.requestFullscreen) video.requestFullscreen();
+  };
+
+  // full konten
+  const box = document.getElementById("downloads");
+  box.innerHTML="";
+  (data.full||[]).forEach(x=>{
     const a=document.createElement("a");
-    a.href=f.url;
+    a.href=x.url;
     a.target="_blank";
-    a.textContent=f.label;
-    full.appendChild(a);
+    a.textContent=x.label;
+    box.appendChild(a);
   });
 
-  document.getElementById("toggle").onclick=()=>toggle();
-  document.getElementById("playBtn").onclick=()=>toggle();
-  document.getElementById("speed").onchange=e=>video.playbackRate=e.target.value;
+  // views (local per video)
+  const key="views_"+id;
+  let views=Number(localStorage.getItem(key)||0)+1;
+  localStorage.setItem(key,views);
+  document.getElementById("views").textContent=views+" views";
 
-  video.addEventListener("timeupdate",()=>{
-    seek.value = video.currentTime;
-  });
-  video.addEventListener("loadedmetadata",()=>{
-    seek.max = video.duration;
-  });
-  seek.oninput=()=>video.currentTime=seek.value;
+  // fake online realtime
+  const online=document.getElementById("online");
+  setInterval(()=>{
+    online.textContent=Math.floor(Math.random()*15+5)+" online";
+  },2500);
 
-  function toggle(){
-    if(video.paused){
-      video.play();
-      overlay.classList.add("hide");
-    }else{
-      video.pause();
-      overlay.classList.remove("hide");
-    }
-  }
-}
-
-/* ============ ANTI INSPECT (SAFE) ============ */
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
-  if(e.keyCode==123) e.preventDefault();
-  if(e.ctrlKey && e.shiftKey) e.preventDefault();
-});
-
-/* ============ POPUNDER (3x / 30m) ============ */
-(function(){
-  const k="pop_ts";
-  const now=Date.now();
-  const last=Number(localStorage.getItem(k)||0);
-  if(now-last>1800000){
-    localStorage.setItem(k,now);
-    const s=document.createElement("script");
-    s.dataset.zone="10109877";
-    s.src="https://al5sm.com/tag.min.js";
-    document.body.appendChild(s);
-  }
 })();
 </script>
+
+<script>
+// anti inspect ringan
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.onkeydown=e=>{
+  if(e.keyCode===123)return false;
+  if(e.ctrlKey&&e.shiftKey)return false;
+};
+</script>
+
 </body>
 </html>
