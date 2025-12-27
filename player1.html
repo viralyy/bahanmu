@@ -3,249 +3,267 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Player</title>
+<title>Stream</title>
 
 <style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui,Arial;
-  background:#060717;
-  color:#fff;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Inter,Arial;
 }
 .wrap{
-  max-width:1000px;
+  max-width:720px;
   margin:auto;
   padding:14px;
 }
 .card{
-  background:#0b1228;
+  background:linear-gradient(180deg,#0b1020,#060814);
   border-radius:14px;
-  overflow:hidden;
-}
-.video-box{
-  position:relative;
-  background:#000;
-}
-video{
-  width:100%;
-  max-height:70vh;
-  background:#000;
-}
-.play-overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.play-btn{
-  background:#1e90ff;
-  border:none;
-  border-radius:999px;
-  padding:16px 28px;
-  font-size:18px;
-  color:#fff;
-  cursor:pointer;
-}
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  padding:10px;
-}
-.btn{
-  background:#121a3a;
-  border:none;
-  color:#fff;
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-}
-.meta{
   padding:12px;
 }
-.title{
-  font-size:20px;
-  font-weight:800;
-}
-.subtitle{
-  color:#9fb0c0;
-  font-size:13px;
-  margin-top:4px;
-}
+.hidden{display:none}
+
+h1{font-size:18px;margin:6px 0}
 .stats{
   display:flex;
   gap:14px;
-  margin-top:8px;
-  font-size:13px;
+  font-size:12px;
+  color:var(--muted);
+  align-items:center;
+}
+.online{
+  display:flex;align-items:center;gap:6px;
 }
 .dot{
   width:8px;height:8px;border-radius:50%;
-  background:#2aff2a;
-  animation:pulse 1.5s infinite;
+  background:#22ff00;
+  opacity:.3;
+  box-shadow:0 0 6px #22ff00;
 }
-@keyframes pulse{
-  0%{opacity:.2}
-  50%{opacity:1}
-  100%{opacity:.2}
+.dot.on{opacity:1}
+
+.video-box{
+  margin-top:10px;
+  position:relative;
 }
-.full{
-  padding:12px;
+video{
+  width:100%;
+  border-radius:12px;
+  background:#000;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s ease;
 }
-.full h3{margin:0 0 8px}
-.full a{
-  display:inline-block;
-  margin:4px 6px 0 0;
+video.ready{
+  opacity:1;
+  transform:scale(1);
+}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+.btn{
+  background:#111827;
+  border:1px solid #1f2937;
+  color:var(--text);
   padding:8px 12px;
-  background:#121a3a;
   border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  border:0;
+}
+select{
+  background:#111827;
+  color:var(--text);
+  border:1px solid #1f2937;
+  border-radius:10px;
+  padding:6px;
+}
+
+.full{
+  margin-top:14px;
+}
+.full a{
+  display:block;
+  margin-top:6px;
+  padding:10px;
+  border-radius:10px;
+  background:#111827;
+  border:1px solid #1f2937;
   color:#fff;
   text-decoration:none;
 }
-.error{
-  padding:40px;
+.full a:hover{background:#1f2937}
+
+#error{
   text-align:center;
-  color:#ff6b6b;
+  padding:40px 10px;
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
-  <div class="card">
 
-    <div class="video-box">
-      <video id="video" controls playsinline></video>
-      <div class="play-overlay" id="overlay">
-        <button class="play-btn" id="playBtn">PLAY</button>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button class="btn" id="prev">Prev</button>
-      <button class="btn" id="next">Next</button>
-      <select class="btn" id="speed">
-        <option value="0.5">0.5x</option>
-        <option value="1" selected>1x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
-    </div>
-
-    <div class="meta">
-      <div class="title" id="title">-</div>
-      <div class="subtitle" id="subtitle">-</div>
-      <div class="stats">
-        <div>👁 <span id="views">Live</span></div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div class="dot"></div> User online
-        </div>
-      </div>
-    </div>
-
-    <div class="full">
-      <h3>Full Konten</h3>
-      <div id="fullLinks"></div>
-    </div>
-
-  </div>
+<div id="error" class="hidden">
+  <h1>KONTEN TIDAK TERSEDIA</h1>
 </div>
 
-<script>
-/* ===== ANTI ERROR CORE ===== */
+<div id="app" class="card hidden">
+
+  <h1 id="title"></h1>
+
+  <div class="stats">
+    <div id="views">0 views</div>
+    <div class="online">
+      <div id="dot" class="dot"></div>
+      <span id="onlineText">0 online</span>
+    </div>
+  </div>
+
+  <div class="video-box">
+    <video id="player" controls playsinline></video>
+  </div>
+
+  <div class="controls">
+    <button id="play" class="btn primary">Play</button>
+    <button id="mute" class="btn">Mute</button>
+
+    <select id="speed">
+      <option value="0.5">0.5x</option>
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+    </select>
+  </div>
+
+  <div class="full">
+    <strong>Full Konten</strong>
+    <div id="fullLinks"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ================= FIREBASE ================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, runTransaction, onValue, onDisconnect, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  authDomain: "stream-counter-b13fc.firebaseapp.com",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+// ========== LOAD DATA ==========
 const params = new URLSearchParams(location.search);
-const id = params.get("v");
-if(!id){
-  document.body.innerHTML='<div class="error">ID TIDAK ADA</div>';
-  throw new Error("NO ID");
-}
+const vid = params.get("v");
 
-const video = document.getElementById("video");
-const overlay = document.getElementById("overlay");
-const playBtn = document.getElementById("playBtn");
-const titleEl = document.getElementById("title");
-const subtitleEl = document.getElementById("subtitle");
-const fullLinksEl = document.getElementById("fullLinks");
-const speedSel = document.getElementById("speed");
-
-let list=[], idx=0;
-
-/* ===== LOAD JSON ===== */
-fetch("videos.json")
-.then(r=>{
-  if(!r.ok) throw "FETCH FAIL";
-  return r.json();
-})
+fetch("videos.json?_=" + Date.now())
+.then(r=>r.json())
 .then(data=>{
-  const d = data[id];
-  if(!d) throw "ID NOT FOUND";
-
-  titleEl.textContent = d.title || "-";
-  subtitleEl.textContent = d.subtitle || "";
-
-  if(!Array.isArray(d.videos) || !d.videos.length)
-    throw "NO VIDEO";
-
-  list = d.videos;
-  video.src = list[0];
-
-  // full links
-  fullLinksEl.innerHTML="";
-  if(Array.isArray(d.full_links)){
-    d.full_links.forEach(l=>{
-      const a=document.createElement("a");
-      a.href=l.url;
-      a.target="_blank";
-      a.textContent=l.label;
-      fullLinksEl.appendChild(a);
-    });
-  }
+  if(!vid || !data[vid]) throw "not found";
+  init(data[vid]);
 })
-.catch(e=>{
-  console.error(e);
-  document.body.innerHTML='<div class="error">KONTEN TIDAK TERSEDIA</div>';
+.catch(()=>{
+  document.getElementById("error").classList.remove("hidden");
 });
 
-/* ===== PLAYER ===== */
-playBtn.onclick=()=>{
-  video.play();
-  overlay.style.display="none";
-};
-video.onclick=()=>{
-  if(video.paused){video.play();overlay.style.display="none";}
-  else video.pause();
-};
-video.onpause=()=>overlay.style.display="";
-video.onended=()=>next();
+function init(video){
+  document.getElementById("app").classList.remove("hidden");
 
-document.getElementById("prev").onclick=()=>{
-  if(!list.length) return;
-  idx = idx>0?idx-1:list.length-1;
-  video.src=list[idx]; video.play();
-};
-function next(){
-  if(!list.length) return;
-  idx = idx<list.length-1?idx+1:0;
-  video.src=list[idx]; video.play();
+  const player = document.getElementById("player");
+  const title = document.getElementById("title");
+  const viewsEl = document.getElementById("views");
+  const onlineEl = document.getElementById("onlineText");
+  const dot = document.getElementById("dot");
+  const fullBox = document.getElementById("fullLinks");
+
+  title.textContent = video.title;
+  player.src = video.src;
+
+  player.addEventListener("loadeddata",()=>player.classList.add("ready"));
+
+  // FULL LINKS (ANTI DUPLIKAT)
+  fullBox.innerHTML = "";
+  (video.downloads||[]).forEach(d=>{
+    const a = document.createElement("a");
+    a.href = d.url;
+    a.target = "_blank";
+    a.textContent = d.label;
+    fullBox.appendChild(a);
+  });
+
+  // ===== VIEWS REAL =====
+  const vRef = ref(db,"views/"+vid);
+  runTransaction(vRef, n=>(n||0)+1);
+  onValue(vRef,s=>viewsEl.textContent = s.val()+" views");
+
+  // ===== ONLINE REAL =====
+  const sid = Date.now()+"_"+Math.random();
+  const oRef = ref(db,"online/"+vid+"/"+sid);
+  set(oRef,true);
+  onDisconnect(oRef).remove();
+
+  onValue(ref(db,"online/"+vid),snap=>{
+    const c = snap.exists()?Object.keys(snap.val()).length:0;
+    onlineEl.textContent = c+" online";
+    dot.classList.toggle("on",c>0);
+  });
+
+  // ===== CONTROLS =====
+  document.getElementById("play").onclick=()=>{
+    if(player.paused) player.play();
+    else player.pause();
+  };
+  document.getElementById("mute").onclick=()=>{
+    player.muted=!player.muted;
+  };
+  document.getElementById("speed").onchange=e=>{
+    player.playbackRate=parseFloat(e.target.value);
+  };
+
+  // ===== POPUNDER LIMIT =====
+  const last = localStorage.getItem("ad_time")||0;
+  if(Date.now()-last>30*60*1000){
+    localStorage.setItem("ad_time",Date.now());
+    (function(s){
+      s.dataset.zone='10109877';
+      s.src='https://al5sm.com/tag.min.js';
+    })(document.body.appendChild(document.createElement('script')));
+  }
 }
-document.getElementById("next").onclick=next;
 
-speedSel.onchange=()=>video.playbackRate=Number(speedSel.value);
-
-/* ===== ANTI INSPECT RINGAN ===== */
+// ===== ANTI INSPECT =====
 document.addEventListener("contextmenu",e=>e.preventDefault());
-document.onkeydown=e=>{
-  if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();
-};
-</script>
-
-<!-- POPUNDER -->
-<script>
-(function(s){
-  s.dataset.zone='10109877';
-  s.src='https://al5sm.com/tag.min.js';
-})(document.body.appendChild(document.createElement('script')));
+document.addEventListener("keydown",e=>{
+  if(e.key==="F12"||(e.ctrlKey&&e.shiftKey)|| (e.ctrlKey&&e.key==="u"))
+    e.preventDefault();
+});
 </script>
 
 </body>
