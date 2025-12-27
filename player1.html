@@ -1,146 +1,262 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Player1 - LEVEL DEWA SETAN</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stream</title>
 
 <style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
 *{box-sizing:border-box}
-body{margin:0; font-family:system-ui,sans-serif; background:#0b0b0b; color:#f1f1f1}
-.container{max-width:480px;margin:auto;padding:16px}
-.video-wrap{position:relative}
-video{width:100%;border-radius:14px;background:#000;display:block;transition:.3s ease;opacity:0;transform:scale(.98)}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Inter,Arial;
+}
+.wrap{max-width:720px;margin:auto;padding:14px}
+.card{
+  background:linear-gradient(180deg,#0b1020,#060814);
+  border-radius:14px;
+  padding:14px;
+}
+.hidden{display:none}
+
+h1{font-size:18px;margin:6px 0}
+.stats{
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  color:var(--muted);
+}
+.online{display:flex;align-items:center;gap:6px}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#22ff00;
+  opacity:.25;
+  box-shadow:0 0 6px #22ff00;
+  transition:.3s;
+}
+.dot.on{opacity:1}
+
+video{
+  width:100%;
+  border-radius:12px;
+  background:#000;
+  margin-top:10px;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s ease;
+}
 video.ready{opacity:1;transform:scale(1)}
-.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.ctrl-btn{display:flex;align-items:center;gap:6px;padding:8px;border-radius:10px;background:linear-gradient(135deg,#ff0055,#ff3c7d);cursor:pointer;color:#fff;font-weight:600}
-.ctrl-btn svg{width:16px;height:16px}
-.stats{display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-top:6px}
-.stats .online{color:#0f0;font-weight:700;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-#fullPopup{position:fixed;bottom:0;left:0;width:100%;background:#111;border-top-left-radius:12px;border-top-right-radius:12px;padding:12px;display:none;animation:fadeIn 0.4s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
-.btn-full-content{margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border-radius:14px;background:linear-gradient(135deg,#ffb800,#ff7a00);cursor:pointer;font-weight:700}
-#fullLinks a{display:block;color:#fff;padding:6px 0;text-decoration:none}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.btn{
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  border:0;
+}
+select{
+  background:#111827;
+  color:#fff;
+  border:1px solid #1f2937;
+  border-radius:10px;
+  padding:6px;
+}
+
+/* FULL KONTEN BUTTON */
+.full-btn{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  font-size:15px;
+  font-weight:600;
+  border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  border:0;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:flex-end;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+}
+.popup.show{opacity:1;pointer-events:auto}
+.popup-box{
+  width:100%;
+  background:#0b1020;
+  border-radius:16px 16px 0 0;
+  padding:16px;
+  transform:translateY(40px);
+  transition:.3s;
+}
+.popup.show .popup-box{transform:translateY(0)}
+.popup-box a{
+  display:block;
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  text-decoration:none;
+}
 </style>
 </head>
+
 <body>
-<div class="container">
-  <h2 id="videoTitle">Loading...</h2>
-  <div class="stats">
-    <div id="views">👁 0 views</div>
-    <div class="online">● 0 online</div>
-  </div>
 
-  <div class="video-wrap">
+<div class="wrap">
+  <div id="app" class="card hidden">
+
+    <h1 id="title"></h1>
+
+    <div class="stats">
+      <div id="views">0 views</div>
+      <div class="online">
+        <div id="dot" class="dot"></div>
+        <span id="onlineText">0 online</span>
+      </div>
+    </div>
+
     <video id="player" playsinline></video>
-    <svg class="watermark" width="80" height="20" viewBox="0 0 120 30" style="position:absolute;bottom:16px;right:16px;opacity:.6;pointer-events:none">
-      <text x="0" y="20" fill="#fff" font-size="16">STREAM+</text>
-    </svg>
-  </div>
 
-  <div class="controls">
-    <div id="playBtn" class="ctrl-btn">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play
+    <div class="controls">
+      <button id="play" class="btn primary">Play</button>
+      <button id="mute" class="btn">Mute</button>
+      <select id="speed">
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+        <option value="6">6x</option>
+        <option value="8">8x</option>
+        <option value="10">10x</option>
+      </select>
     </div>
-    <div id="muteBtn" class="ctrl-btn">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg> Mute
-    </div>
-    <div id="speedBtn" class="ctrl-btn">1x</div>
-    <div id="fullContentBtn" class="btn-full-content">Full Konten</div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
+
   </div>
 </div>
 
-<div id="fullPopup">
-  <h3>Full Konten</h3>
-  <div id="fullLinks"></div>
+<div id="popup" class="popup">
+  <div class="popup-box" id="popupBox"></div>
 </div>
 
-<script>
-// ======= CONFIG =======
-const videosJson = "videos.json"; // ambil semua data
-let currentVideoId = new URLSearchParams(location.search).get("v") || null;
-let videoData = null;
-let video = document.getElementById("player");
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getDatabase, ref, runTransaction,
+  onValue, set, onDisconnect
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-// ======= LOAD JSON =======
-fetch(videosJson+'?_='+Date.now())
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+const vid = new URLSearchParams(location.search).get("v");
+
+fetch("videos.json?_="+Date.now())
 .then(r=>r.json())
 .then(data=>{
-  if(!currentVideoId || !data[currentVideoId]){ alert("Video tidak tersedia"); return; }
-  videoData = data[currentVideoId];
-  document.getElementById("videoTitle").textContent = videoData.title;
-  video.src = videoData.src;
-  buildFullLinks();
-})
-.catch(e=>console.error("Gagal load JSON:", e));
+  if(!vid || !data[vid]) return;
+  initPlayer(data[vid]);
+});
 
-// ======= FULL LINKS =======
-function buildFullLinks(){
-  const container = document.getElementById("fullLinks");
-  container.innerHTML = "";
-  if(!videoData.downloads) return;
-  videoData.downloads.forEach(d=>{
-    let url = d.url || d;
-    let label = d.label || "Download";
-    const a = document.createElement("a");
-    a.href = url;
-    a.target="_blank";
-    a.textContent = label;
-    container.appendChild(a);
+function initPlayer(video){
+  const app=document.getElementById("app");
+  app.classList.remove("hidden");
+
+  const player=document.getElementById("player");
+  const viewsEl=document.getElementById("views");
+  const onlineEl=document.getElementById("onlineText");
+  const dot=document.getElementById("dot");
+
+  document.getElementById("title").textContent=video.title;
+  player.src=video.src;
+
+  player.onloadeddata=()=>player.classList.add("ready");
+
+  document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
+  document.getElementById("mute").onclick=()=>player.muted=!player.muted;
+  document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
+
+  // FULL KONTEN
+  const popup=document.getElementById("popup");
+  const box=document.getElementById("popupBox");
+  document.getElementById("openFull").onclick=()=>{
+    box.innerHTML="";
+    (video.downloads||[]).forEach(d=>{
+      const a=document.createElement("a");
+      a.href=d.url;a.target="_blank";a.textContent=d.label;
+      box.appendChild(a);
+    });
+    popup.classList.add("show");
+  };
+  popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
+
+  // VIEWS (FIX NUMBER)
+  const vRef=ref(db,"views/"+vid);
+  runTransaction(vRef,cur=> (parseInt(cur)||0)+1);
+  onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
+
+  // ONLINE (FIX STABLE)
+  const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
+  const oRef=ref(db,"online/"+vid+"/"+sid);
+  set(oRef,true);
+  onDisconnect(oRef).remove();
+
+  onValue(ref(db,"online/"+vid),s=>{
+    const c=s.exists()?Object.keys(s.val()).length:0;
+    onlineEl.textContent=c+" online";
+    dot.classList.toggle("on",c>0);
   });
 }
 
-// ======= VIEWS & ONLINE =======
-let views = parseInt(localStorage.getItem("views_"+currentVideoId)||0)+1;
-localStorage.setItem("views_"+currentVideoId,views);
-document.getElementById("views").textContent = "👁 "+views+" views";
-
-function updateOnline(){
-  document.querySelector(".online").textContent = "● "+(Math.floor(Math.random()*30)+1)+" online";
-}
-setInterval(updateOnline,3000);
-updateOnline();
-
-// ======= CONTROLS =======
-let isPlaying = false;
-let isMuted = false;
-let speed = 1;
-
-function togglePlay(){ if(video.paused){ video.play(); isPlaying=true; } else{ video.pause(); isPlaying=false; } }
-document.getElementById("playBtn").addEventListener("click", togglePlay);
-
-document.getElementById("muteBtn").addEventListener("click",()=>{
-  isMuted = !isMuted;
-  video.muted = isMuted;
-});
-
-document.getElementById("speedBtn").addEventListener("click",()=>{
-  speed += 0.25; if(speed>10) speed=0.25;
-  video.playbackRate = speed;
-  document.getElementById("speedBtn").textContent = speed+"x";
-});
-
-// ======= FULL CONTENT POPUP =======
-document.getElementById("fullContentBtn").addEventListener("click",()=>{
-  const popup = document.getElementById("fullPopup");
-  popup.style.display = "block";
-});
-
-// ======= VIDEO READY ANIMATION =======
-video.addEventListener("loadeddata",()=>{ video.classList.add("ready"); });
-
-// ======= POPUNDER =======
+// ====== POPUNDER ======
 (function(s){
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
-
-// ======= ANTI INSPECT =======
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.onkeydown=function(e){
-  if(e.keyCode==123||((e.ctrlKey||e.metaKey)&&(e.shiftKey||e.keyCode==73||e.keyCode==74))) return false;
-}
 </script>
+
 </body>
 </html>
