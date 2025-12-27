@@ -7,172 +7,260 @@
 
 <style>
 :root{
-  --bg:#050812;
-  --panel:#0b1226;
-  --muted:#9fb0c0;
+  --bg:#0b0d17;
+  --card:#111528;
+  --muted:#9aa4c7;
   --accent:#4f8cff;
+  --radius:14px;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:linear-gradient(180deg,#020617,#071129);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  color:#eaf4ff;
+  background:linear-gradient(180deg,#060816,#0b0d17);
+  font-family:system-ui,Segoe UI,Roboto,Arial;
+  color:#eef2ff
 }
 .wrap{
-  max-width:920px;
-  margin:20px auto;
-  padding:12px;
+  max-width:900px;
+  margin:24px auto;
+  padding:12px
 }
 .card{
-  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.15));
-  border-radius:16px;
+  background:var(--card);
+  border-radius:var(--radius);
   overflow:hidden;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  box-shadow:0 20px 40px rgba(0,0,0,.45)
 }
-.player{
+
+/* ===== VIDEO ===== */
+.video-box{
   position:relative;
-  background:#000;
+  background:#000
 }
 video{
   width:100%;
-  max-height:70vh;
   display:block;
+  max-height:70vh;
+  background:#000
 }
-.overlay{
+.watermark{
   position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  right:14px;
+  bottom:14px;
+  opacity:.5;
+  pointer-events:none
 }
-.play-btn{
-  background:rgba(0,0,0,.6);
-  border:1px solid rgba(255,255,255,.2);
-  color:#fff;
-  padding:14px 22px;
-  border-radius:999px;
-  font-weight:700;
-  cursor:pointer;
-}
-.meta{
-  padding:14px;
+
+/* ===== TOP INFO ===== */
+.info{
+  padding:14px
 }
 .title{
   font-size:20px;
-  font-weight:800;
+  font-weight:800
 }
-.sub{
+.stats{
+  margin-top:6px;
+  display:flex;
+  gap:16px;
   font-size:13px;
-  color:var(--muted);
-  margin-top:4px;
+  color:var(--muted)
 }
-.full{
-  padding:14px;
-  border-top:1px solid rgba(255,255,255,.06);
+
+/* ===== CONTROLS ===== */
+.controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid rgba(255,255,255,.05)
 }
-.full a{
-  display:inline-block;
-  margin:6px 6px 0 0;
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
   padding:8px 12px;
+  background:#1a1f3d;
   border-radius:10px;
-  background:rgba(255,255,255,.05);
-  color:#fff;
+  cursor:pointer;
+  user-select:none
+}
+.btn.primary{
+  background:linear-gradient(135deg,#4f8cff,#2dd4ff)
+}
+.range{
+  flex:1
+}
+input[type=range]{
+  width:100%
+}
+
+/* ===== FULL LINKS ===== */
+.section{
+  padding:14px
+}
+.section h3{
+  margin:0 0 8px;
+  font-size:16px
+}
+.links{
+  display:grid;
+  gap:8px
+}
+.link{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  background:#151a35;
+  border-radius:10px;
   text-decoration:none;
-  font-size:14px;
+  color:#eef2ff
 }
-.error{
-  padding:40px;
-  text-align:center;
-  color:#ff9a9a;
-}
+.link:hover{background:#1b2250}
+svg{width:18px;height:18px;fill:#fff}
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
   <div class="card">
-    <div class="player">
-      <video id="video" playsinline></video>
-      <div class="overlay" id="overlay">
-        <button class="play-btn" id="playBtn">PLAY</button>
+
+    <!-- VIDEO -->
+    <div class="video-box">
+      <video id="video" playsinline preload="metadata"></video>
+
+      <!-- watermark -->
+      <svg class="watermark" width="90" height="24" viewBox="0 0 120 30">
+        <text x="0" y="20" font-size="16" fill="#fff">STREAM+</text>
+      </svg>
+    </div>
+
+    <!-- INFO -->
+    <div class="info">
+      <div class="title" id="title">Loading...</div>
+      <div class="stats">
+        <div id="views">0 views</div>
+        <div id="today">0 today</div>
       </div>
     </div>
 
-    <div class="meta">
-      <div class="title" id="title">Loading…</div>
-      <div class="sub" id="sub"></div>
+    <!-- CONTROLS -->
+    <div class="controls">
+      <div class="btn primary" id="playBtn">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Play
+      </div>
+      <div class="range">
+        <input id="seek" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="btn" id="fsBtn">
+        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
+      </div>
     </div>
 
-    <div class="full" id="fullLinks"></div>
+    <!-- FULL CONTENT -->
+    <div class="section">
+      <h3>Full Konten</h3>
+      <div class="links" id="fullLinks"></div>
+    </div>
+
   </div>
 </div>
 
+<!-- ================= DATA ================= -->
 <script>
-const q = new URLSearchParams(location.search);
-const vid = q.get("v");
-
-const video = document.getElementById("video");
-const overlay = document.getElementById("overlay");
-const playBtn = document.getElementById("playBtn");
-const titleEl = document.getElementById("title");
-const subEl = document.getElementById("sub");
-const fullEl = document.getElementById("fullLinks");
-
-if(!vid){
-  document.querySelector(".card").innerHTML =
-    '<div class="error">Video ID tidak ditemukan</div>';
-  throw "";
-}
-
-fetch("videos.json")
-  .then(r=>r.json())
-  .then(db=>{
-    const data = db[vid];
-    if(!data){
-      document.querySelector(".card").innerHTML =
-        '<div class="error">Video tidak tersedia</div>';
-      return;
-    }
-
-    titleEl.textContent = data.title || "";
-    subEl.textContent = data.subtitle || "";
-    video.src = data.src;
-
-    fullEl.innerHTML = "";
-    (data.full||[]).forEach(f=>{
-      const a=document.createElement("a");
-      a.href=f.url;
-      a.target="_blank";
-      a.rel="nofollow noopener";
-      a.textContent=f.label;
-      fullEl.appendChild(a);
-    });
-  });
-
-playBtn.onclick = ()=>{
-  video.play();
-  overlay.style.display="none";
-};
-
-video.onclick = ()=>{
-  if(video.paused){
-    video.play();
-    overlay.style.display="none";
-  }else{
-    video.pause();
-    overlay.style.display="";
-  }
+const DATA = {
+  title: "Contoh Video",
+  src: "https://cdn.videy.co/2OkmEh8x2.mov",
+  full: [
+    {label:"Terabox Full", url:"https://1024terabox.com/s/xxxxx"},
+    {label:"UC Share", url:"https://uc-share.com/s/xxxxx"},
+    {label:"Mirror Backup", url:"https://example.com"}
+  ]
 };
 </script>
 
-<!-- POPUNDER -->
+<!-- ================= FIREBASE ================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  authDomain: "stream-counter-b13fc.firebaseapp.com",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const id = new URLSearchParams(location.search).get("v") || "global";
+const todayKey = new Date().toISOString().slice(0,10);
+
+// total views
+runTransaction(ref(db,`views/${id}/total`),v=>(v||0)+1)
+.then(r=>document.getElementById("views").textContent=r.snapshot.val()+" views");
+
+// today
+runTransaction(ref(db,`views/${id}/today/${todayKey}`),v=>(v||0)+1)
+.then(r=>document.getElementById("today").textContent=r.snapshot.val()+" today");
+</script>
+
+<!-- ================= PLAYER LOGIC ================= -->
+<script>
+const v=document.getElementById("video");
+const playBtn=document.getElementById("playBtn");
+const seek=document.getElementById("seek");
+
+document.getElementById("title").textContent=DATA.title;
+v.src=DATA.src;
+
+v.addEventListener("loadedmetadata",()=>{
+  seek.max=v.duration;
+});
+v.addEventListener("timeupdate",()=>{
+  seek.value=v.currentTime;
+});
+seek.oninput=()=>v.currentTime=seek.value;
+
+playBtn.onclick=()=>{
+  if(v.paused){v.play();playBtn.innerHTML=playBtn.innerHTML.replace("Play","Pause")}
+  else{v.pause();playBtn.innerHTML=playBtn.innerHTML.replace("Pause","Play")}
+};
+
+document.getElementById("fsBtn").onclick=()=>{
+  v.requestFullscreen?.();
+};
+
+// full links + redirect 1x
+const box=document.getElementById("fullLinks");
+DATA.full.forEach(f=>{
+  const a=document.createElement("a");
+  a.className="link";
+  a.href=f.url;
+  a.target="_blank";
+  a.onclick=e=>{
+    if(!localStorage.getItem("ad_done")){
+      e.preventDefault();
+      localStorage.setItem("ad_done","1");
+      location.href="https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416";
+    }
+  };
+  a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/></svg>${f.label}`;
+  box.appendChild(a);
+});
+</script>
+
+<!-- ================= POPUNDER ================= -->
 <script>
 (function(s){
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean).pop()
-  .appendChild(document.createElement('script')));
+})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
 
 </body>
