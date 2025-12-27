@@ -1,266 +1,239 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Premium Stream</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player Level Dewa</title>
 
 <style>
 :root{
-  --bg:#0b0c10;
-  --card:#14151c;
-  --soft:#1d1f29;
-  --accent:#ff2f6d;
-  --text:#f1f1f1;
-  --muted:#9aa0b3;
-  --radius:18px;
+  --bg:#0b0f1a;
+  --panel:#12172a;
+  --text:#eaf0ff;
+  --muted:#9aa4c7;
+  --accent:#4f8cff;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
-  background:var(--bg);
+  background:linear-gradient(180deg,#050714,#0b0f1a);
   color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  font-family:system-ui,Inter,Arial;
 }
-
 .wrapper{
-  max-width:480px;
-  margin:auto;
-  padding:16px;
+  max-width:1000px;
+  margin:20px auto;
+  padding:12px;
 }
-
-/* ===== VIDEO ===== */
-.player{
-  position:relative;
-  background:#000;
-  border-radius:var(--radius);
+.card{
+  background:var(--panel);
+  border-radius:16px;
+  box-shadow:0 20px 40px rgba(0,0,0,.6);
   overflow:hidden;
 }
-
+.video-wrap{
+  position:relative;
+  background:#000;
+}
 video{
   width:100%;
+  max-height:70vh;
   display:block;
-  opacity:0;
-  transform:scale(.97);
-  transition:.4s ease;
-}
-video.ready{opacity:1;transform:scale(1)}
-
-.cinema{
-  position:fixed;
-  inset:0;
   background:#000;
-  z-index:999;
-  display:none;
+}
+.play-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
   align-items:center;
   justify-content:center;
 }
-.cinema video{max-width:100%;max-height:100%}
+.play-btn{
+  background:rgba(0,0,0,.65);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;
+  padding:14px 22px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  backdrop-filter:blur(6px);
+}
+.play-btn svg{width:22px;height:22px;fill:#fff}
 
-/* ===== META ===== */
-.meta{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:14px;
-  margin-top:14px;
+.controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.btn{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--text);
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.btn svg{width:16px;height:16px;fill:currentColor}
+
+.seek{
+  flex:1;
+}
+.seek input{
+  width:100%;
 }
 
-.title{font-weight:700;font-size:16px}
+.meta{
+  padding:14px;
+}
+.title{
+  font-size:20px;
+  font-weight:800;
+}
 .stats{
   display:flex;
   gap:14px;
-  font-size:12px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.stat{
+  background:rgba(255,255,255,.04);
+  padding:8px 12px;
+  border-radius:10px;
+  font-size:13px;
   color:var(--muted);
-  margin-top:6px;
 }
+.stat b{color:#fff}
 
-/* ===== ACTION ===== */
-.actions{
-  display:grid;
-  gap:10px;
-  margin-top:14px;
-}
-
-.btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:14px;
-  border-radius:var(--radius);
-  font-weight:700;
-  cursor:pointer;
-}
-
-.primary{
-  background:linear-gradient(135deg,#ff2f6d,#ff5b8a);
-}
-.soft{background:var(--soft)}
-
-svg{width:18px;height:18px;fill:currentColor}
-
-/* ===== UNLOCK ===== */
-.unlock{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:14px;
-  margin-top:12px;
-  display:none;
-}
-
-.progress{
-  height:6px;
-  background:#222;
-  border-radius:6px;
-  overflow:hidden;
-  margin-top:8px;
-}
-.bar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#ff2f6d,#ff7aa2);
-  transition:.3s;
-}
-
-/* ===== FULL LINKS ===== */
-.full{
-  display:none;
-  margin-top:12px;
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:12px;
-  display:grid;
-  gap:10px;
-}
-.full a{
-  background:var(--soft);
-  padding:12px;
-  border-radius:12px;
-  text-decoration:none;
-  color:#fff;
-  text-align:center;
-  font-weight:700;
+@media(max-width:600px){
+  .controls{flex-wrap:wrap}
 }
 </style>
 </head>
 
 <body>
 <div class="wrapper">
+  <div class="card">
 
-  <!-- VIDEO -->
-  <div class="player">
-    <video id="video" controls playsinline
-      src="https://cdn.videy.co/fgv29OQB1.mp4"></video>
-  </div>
-
-  <!-- META -->
-  <div class="meta">
-    <div class="title">Premium Stream Content</div>
-    <div class="stats">
-      <div id="views">0 views</div>
-      <div id="today">0 today</div>
-    </div>
-  </div>
-
-  <!-- ACTION -->
-  <div class="actions">
-    <div class="btn primary" id="unlockBtn">
-      <svg viewBox="0 0 24 24"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-7h-1V7a5 5 0 0 0-10 0v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zM9 7a3 3 0 0 1 6 0v3H9V7z"/></svg>
-      Unlock Full Konten
+    <div class="video-wrap">
+      <video id="video" preload="metadata" playsinline></video>
+      <div class="play-overlay" id="overlay">
+        <div class="play-btn" id="playBtn">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          PLAY
+        </div>
+      </div>
     </div>
 
-    <div class="btn soft" id="cinemaBtn">
-      <svg viewBox="0 0 24 24"><path d="M7 14h10V10H7v4zm14-9H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/></svg>
-      Cinema Mode
+    <div class="controls">
+      <button class="btn" id="toggle">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Play
+      </button>
+      <div class="seek">
+        <input type="range" id="seek" min="0" max="100" value="0">
+      </div>
+      <button class="btn" id="mute">
+        <svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 5V4l-5 5z"/></svg>
+      </button>
     </div>
 
-    <div class="btn soft" id="shareBtn">
-      <svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.24 1.03L8.91 13.7a3.3 3.3 0 0 0 0-1.39l6.72-3.32A3 3 0 1 0 14 5a3 3 0 0 0 .24 1.17L7.52 9.49A3 3 0 1 0 6 15a3 3 0 0 0 1.52-.49l6.72 3.32A3 3 0 1 0 18 16z"/></svg>
-      Share Link
+    <div class="meta">
+      <div class="title">Exclusive Stream</div>
+      <div class="stats">
+        <div class="stat">👁 Total views: <b id="views">0</b></div>
+        <div class="stat">📅 Hari ini: <b id="today">0</b></div>
+        <div class="stat">🟢 Online: <b id="online">0</b></div>
+      </div>
     </div>
+
   </div>
-
-  <!-- UNLOCK -->
-  <div class="unlock" id="unlockBox">
-    <div>Menyiapkan full konten…</div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
-  </div>
-
-  <!-- FULL -->
-  <div class="full" id="fullBox"></div>
-
 </div>
 
-<script>
-/* VIDEO READY */
-const v=document.getElementById("video");
-v.addEventListener("loadeddata",()=>v.classList.add("ready"));
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, runTransaction, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-/* VIEW LOGIC (ANTI SPAM) */
-const vid="premium1";
-const now=Date.now();
-const last=+localStorage.getItem("last_"+vid)||0;
-let views=+localStorage.getItem("views_"+vid)||0;
-if(now-last>60000){views++;localStorage.setItem("views_"+vid,views);localStorage.setItem("last_"+vid,now);}
-document.getElementById("views").textContent=views+" views";
-
-/* TODAY */
-const tkey="today_"+vid+new Date().toDateString();
-let today=+localStorage.getItem(tkey)||0;
-today++;localStorage.setItem(tkey,today);
-document.getElementById("today").textContent=today+" today";
-
-/* UNLOCK */
-const unlockBtn=document.getElementById("unlockBtn");
-const unlockBox=document.getElementById("unlockBox");
-const bar=document.getElementById("bar");
-const fullBox=document.getElementById("fullBox");
-let unlocked=false;
-
-const LINKS=[
- {label:"Terabox Full",url:"https://1024terabox.com/s/xxxx"},
- {label:"Mirror Link",url:"https://example.com"}
-];
-
-unlockBtn.onclick=()=>{
- if(unlocked)return;
- unlocked=true;
- unlockBox.style.display="block";
- let p=0;
- const t=setInterval(()=>{
-   p+=5; bar.style.width=p+"%";
-   if(p>=100){
-     clearInterval(t);
-     unlockBox.style.display="none";
-     fullBox.style.display="grid";
-     LINKS.forEach(l=>{
-       const a=document.createElement("a");
-       a.href=l.url;a.target="_blank";a.textContent=l.label;
-       fullBox.appendChild(a);
-     });
-   }
- },120);
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  authDomain: "stream-counter-b13fc.firebaseapp.com",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  storageBucket: "stream-counter-b13fc.firebasestorage.app",
+  messagingSenderId: "280528312474",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
 };
 
-/* CINEMA */
-document.getElementById("cinemaBtn").onclick=()=>{
-  const c=document.createElement("div");
-  c.className="cinema";
-  const vc=v.cloneNode(true);
-  vc.controls=true;vc.autoplay=true;
-  c.appendChild(vc);
-  document.body.appendChild(c);
-  c.style.display="flex";
-  c.onclick=()=>c.remove();
-};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-/* SHARE */
-document.getElementById("shareBtn").onclick=()=>{
- navigator.clipboard.writeText(location.href);
- alert("Link disalin");
-};
+// ID unik per halaman
+const PAGE_ID = "player-demo-1";
+
+// ===== VIEW COUNTER =====
+const viewsRef = ref(db, `pages/${PAGE_ID}/views`);
+const todayRef = ref(db, `pages/${PAGE_ID}/today/${new Date().toISOString().slice(0,10)}`);
+
+// anti spam
+if(!localStorage.getItem("viewed-"+PAGE_ID)){
+  runTransaction(viewsRef, v => (v || 0) + 1);
+  runTransaction(todayRef, v => (v || 0) + 1);
+  localStorage.setItem("viewed-"+PAGE_ID,"1");
+}
+
+// realtime update
+onValue(viewsRef, s => views.textContent = s.val() || 0);
+onValue(todayRef, s => today.textContent = s.val() || 0);
+
+// ===== ONLINE COUNTER =====
+const onlineRef = ref(db, `pages/${PAGE_ID}/online/${crypto.randomUUID()}`);
+set(onlineRef, true);
+onDisconnect(onlineRef).remove();
+
+onValue(ref(db, `pages/${PAGE_ID}/online`), snap=>{
+  online.textContent = snap.size || 0;
+});
 </script>
+
+<!-- PLAYER SCRIPT -->
+<script>
+const video = document.getElementById("video");
+video.src = "https://cdn.videy.co/QbnJRJmV1.mp4";
+
+const overlay = document.getElementById("overlay");
+const toggle = document.getElementById("toggle");
+const seek = document.getElementById("seek");
+const mute = document.getElementById("mute");
+
+function playToggle(){
+  if(video.paused){
+    video.play();
+    overlay.style.display="none";
+  }else{
+    video.pause();
+  }
+}
+
+toggle.onclick = playToggle;
+overlay.onclick = playToggle;
+video.onclick = playToggle;
+
+video.ontimeupdate = ()=>{
+  seek.value = (video.currentTime / video.duration) * 100 || 0;
+}
+seek.oninput = ()=>{
+  video.currentTime = (seek.value/100) * video.duration;
+}
+mute.onclick = ()=>{
+  video.muted = !video.muted;
+}
+</script>
+
 </body>
 </html>
