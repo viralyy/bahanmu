@@ -1,217 +1,253 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
+<title>Stream Player</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Player</title>
-
 <style>
-:root{
-  --bg:#0b0d17;
-  --card:#111528;
-  --muted:#9aa4c7;
-  --accent:#4f8cff;
-}
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:linear-gradient(180deg,#060816,#0b0d17);
-  font-family:system-ui,Segoe UI,Roboto;
-  color:#eef2ff
+  background:#0b0b0b;
+  color:#f1f1f1;
+  font-family:system-ui,-apple-system,sans-serif
 }
-.wrap{max-width:900px;margin:24px auto;padding:12px}
-.card{
-  background:var(--card);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 20px 40px rgba(0,0,0,.45)
+.wrap{
+  max-width:520px;
+  margin:auto;
+  padding:16px
 }
-.video-box{position:relative;background:#000}
-video{width:100%;max-height:70vh;background:#000}
-.watermark{
-  position:absolute;right:14px;bottom:14px;
-  opacity:.55;pointer-events:none
+.hidden{display:none}
+
+h1{
+  font-size:18px;
+  margin:6px 0 10px
 }
-.info{padding:14px}
-.title{font-size:20px;font-weight:800}
+
 .stats{
-  display:flex;gap:16px;
-  font-size:13px;color:var(--muted);margin-top:6px
+  display:flex;
+  gap:12px;
+  font-size:12px;
+  color:#aaa;
+  align-items:center
 }
-.online-dot{
+.stat{
+  display:flex;
+  align-items:center;
+  gap:6px
+}
+.dot{
   width:8px;height:8px;border-radius:50%;
-  background:#22c55e;display:inline-block;
+  background:#2cff5a;
   animation:pulse 1s infinite
 }
 @keyframes pulse{
-  0%,100%{opacity:.3}
+  0%{opacity:.3}
   50%{opacity:1}
+  100%{opacity:.3}
 }
 
-.controls{
-  display:flex;gap:10px;align-items:center;
-  padding:12px;border-top:1px solid rgba(255,255,255,.05)
+.video-box{
+  position:relative;
+  margin-top:10px
 }
-.btn{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:8px 12px;border-radius:10px;
-  background:#1a1f3d;cursor:pointer
+video{
+  width:100%;
+  border-radius:14px;
+  background:#000
 }
-.btn.primary{background:linear-gradient(135deg,#4f8cff,#2dd4ff)}
-.range{flex:1}
-input[type=range]{width:100%}
-select{background:#1a1f3d;color:#fff;border:none;border-radius:8px;padding:6px}
 
-.section{padding:14px}
-.links{display:grid;gap:8px}
+.speed{
+  display:flex;
+  gap:8px;
+  margin-top:10px
+}
+.speed button{
+  flex:1;
+  padding:8px;
+  background:#1b1b1b;
+  border:none;
+  color:#fff;
+  border-radius:10px;
+  font-size:12px
+}
+
+.links{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
 .link{
-  display:flex;gap:10px;align-items:center;
-  padding:10px;background:#151a35;
-  border-radius:10px;color:#fff;text-decoration:none
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+  color:#fff;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:600
 }
-svg{width:18px;height:18px;fill:#fff}
+.link svg{width:18px;height:18px;fill:#fff}
+
+.error{
+  text-align:center;
+  margin-top:40px;
+  color:#aaa
+}
 </style>
 </head>
 
 <body>
+<div class="wrap hidden" id="app">
 
-<div class="wrap">
-<div class="card">
+  <h1 id="title"></h1>
 
-<div class="video-box">
-  <video id="video" playsinline preload="metadata"></video>
-  <svg class="watermark" width="90" height="24" viewBox="0 0 120 30">
-    <text x="0" y="20" font-size="16" fill="#fff">STREAM+</text>
-  </svg>
-</div>
-
-<div class="info">
-  <div class="title" id="title">Loading…</div>
   <div class="stats">
-    <div id="views">0 views</div>
-    <div><span class="online-dot"></span> <span id="online">0 online</span></div>
-  </div>
-</div>
-
-<div class="controls">
-  <div class="btn primary" id="playBtn">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    Play
-  </div>
-
-  <div class="range">
-    <input id="seek" type="range" min="0" max="100" value="0">
+    <div class="stat">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#aaa" d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
+      <span id="views">0</span>
+    </div>
+    <div class="stat">
+      <span class="dot"></span>
+      <span id="online">1 online</span>
+    </div>
   </div>
 
-  <select id="speed">
-    <option value="0.75">0.75x</option>
-    <option value="1" selected>1x</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="2">2x</option>
-  </select>
-</div>
+  <div class="video-box">
+    <video id="player" controls playsinline></video>
+  </div>
 
-<div class="section">
-  <h3>Full Konten</h3>
+  <div class="speed">
+    <button onclick="spd(0.75)">0.75x</button>
+    <button onclick="spd(1)">1x</button>
+    <button onclick="spd(1.25)">1.25x</button>
+    <button onclick="spd(1.5)">1.5x</button>
+  </div>
+
   <div class="links" id="fullLinks"></div>
-</div>
 
 </div>
+
+<div class="wrap" id="error">
+  <div class="error">Konten tidak tersedia</div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, runTransaction, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  authDomain: "stream-counter-b13fc.firebaseapp.com",
   databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "stream-counter-b13fc",
+  storageBucket: "stream-counter-b13fc.appspot.com",
+  messagingSenderId: "280528312474",
   appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const vid = new URLSearchParams(location.search).get("v") || "global";
+const id = new URLSearchParams(location.search).get("v");
+if(!id) location.replace("/");
 
-/* views */
-runTransaction(ref(db,`views/${vid}`),v=>(v||0)+1)
-.then(r=>views.textContent=r.snapshot.val()+" views");
+const viewsRef = ref(db, "views/"+id);
+const onlineRef = ref(db, "online/"+id);
 
-/* online realtime */
-const onlineRef = ref(db,`online/${vid}`);
-runTransaction(onlineRef,v=>(v||0)+1);
-onValue(onlineRef,s=>online.textContent=s.val()+" online");
-window.addEventListener("beforeunload",()=>runTransaction(onlineRef,v=>Math.max((v||1)-1,0)));
-</script>
+runTransaction(viewsRef, v => (v||0)+1);
 
-<!-- ================= PLAYER + JSON ================= -->
-<script>
-const v=document.getElementById("video");
-const playBtn=document.getElementById("playBtn");
-const seek=document.getElementById("seek");
-const speed=document.getElementById("speed");
+const me = ref(db, "online/"+id+"/"+Math.random().toString(36).slice(2));
+runTransaction(onlineRef, v => (v||0)+1);
+onDisconnect(me).remove();
+onDisconnect(onlineRef).transaction(v=>(v||1)-1);
 
-const id=new URLSearchParams(location.search).get("v");
-fetch("videos.json?_="+Date.now())
-.then(r=>r.json())
-.then(j=>{
-  if(!j[id])return;
-  const d=j[id];
-  title.textContent=d.title;
-  v.src=d.src;
-
-  d.full.forEach(f=>{
-    const a=document.createElement("a");
-    a.className="link";
-    a.href=f.url;
-    a.target="_blank";
-    a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/></svg>${f.label}`;
-    a.onclick=e=>adGate(e,f.url);
-    fullLinks.appendChild(a);
-  });
+onValue(viewsRef, s=>{
+  document.getElementById("views").textContent = s.val()||1;
 });
 
-v.onloadedmetadata=()=>seek.max=v.duration;
-v.ontimeupdate=()=>seek.value=v.currentTime;
-seek.oninput=()=>v.currentTime=seek.value;
-speed.onchange=()=>v.playbackRate=speed.value;
+onValue(onlineRef, s=>{
+  const val = s.val();
+  document.getElementById("online").textContent =
+    (typeof val==="number"?val:1)+" online";
+});
+</script>
 
-playBtn.onclick=()=>v.paused?v.play():v.pause();
+<!-- DATA -->
+<script>
+fetch("videos.json")
+.then(r=>r.json())
+.then(j=>{
+  const d = j[id];
+  if(!d) return;
 
-/* ===== IKLAN MAX 3x / 30 MENIT ===== */
-function adGate(e,url){
-  const k="ad_hits";
-  let d=JSON.parse(localStorage.getItem(k)||"[]");
-  const now=Date.now();
-  d=d.filter(t=>now-t<30*60*1000);
-  if(d.length<3){
-    e.preventDefault();
-    d.push(now);
-    localStorage.setItem(k,JSON.stringify(d));
-    location.href="https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416";
-    setTimeout(()=>location.href=url,1200);
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("error").style.display="none";
+
+  title.textContent = d.title;
+  player.src = d.src;
+
+  const box = document.getElementById("fullLinks");
+  box.innerHTML="";
+
+  if(Array.isArray(d.full)){
+    d.full.forEach(f=>{
+      const a=document.createElement("a");
+      a.className="link";
+      a.href=f.url;
+      a.target="_blank";
+      a.innerHTML=`
+        <svg viewBox="0 0 24 24">
+          <path d="M12 16l4-5h-3V4h-2v7H8zM5 18h14v2H5z"/>
+        </svg>
+        <span>${f.label}</span>
+      `;
+      a.onclick=e=>gate(e,f.url);
+      box.appendChild(a);
+    });
   }
+});
+</script>
+
+<!-- SPEED -->
+<script>
+function spd(v){player.playbackRate=v}
+</script>
+
+<!-- POPUNDER 3x / 30 MENIT -->
+<script>
+const AD_LIMIT=3, AD_TIME=30*60*1000;
+function gate(e,url){
+  e.preventDefault();
+  let d=JSON.parse(localStorage.getItem("ad")||'{"c":0,"t":0}');
+  if(Date.now()-d.t>AD_TIME)d={c:0,t:Date.now()};
+  if(d.c<AD_LIMIT){
+    d.c++; d.t=Date.now();
+    localStorage.setItem("ad",JSON.stringify(d));
+    window.open("https://ue.foraketene.com/i3BymWkD9CCHR9ZcI/131416","_blank");
+    setTimeout(()=>location.href=url,600);
+  }else location.href=url;
 }
 </script>
 
-<!-- ================= POPUNDER ================= -->
+<!-- POPUNDER SCRIPT -->
 <script>
 (function(s){
   s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+})([document.documentElement,document.body].filter(Boolean).pop()
+  .appendChild(document.createElement('script')));
 </script>
 
-<!-- ================= ANTI INSPECT (SOFT) ================= -->
+<!-- ANTI INSPECT (BASIC) -->
 <script>
 document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
-  if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();
-});
+document.onkeydown=e=>{
+  if(e.keyCode==123||e.ctrlKey&&e.shiftKey||e.ctrlKey&&e.key=="u")return false;
+};
 </script>
 
 </body>
