@@ -2,140 +2,48 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Stream Next-Level</title>
+<title>Stream - Level Dewa</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{
-  --bg:#0b0b0b; --panel:#11141f; --accent:#3b82f6;
-  --text:#e5e7eb; --muted:#9ca3af; --online:#22ff00;
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
 }
 *{box-sizing:border-box;}
-body{
-  margin:0;
-  font-family:system-ui,Segoe UI,Arial;
-  background:var(--bg);
-  color:var(--text);
-}
-.wrap{
-  max-width:720px;
-  margin:20px auto;
-  padding:14px;
-}
-.card{
-  background:linear-gradient(180deg,#11141f,#0b0b0b);
-  border-radius:14px;
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.stats{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:13px;
-  color:var(--muted);
-}
-.online{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.dot{
-  width:8px; height:8px;
-  border-radius:50%;
-  background:var(--online);
-  opacity:.25;
-  box-shadow:0 0 6px var(--online);
-  transition:.3s;
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Inter,Arial;}
+.wrap{max-width:720px;margin:auto;padding:14px;}
+.card{background:linear-gradient(180deg,#0b1020,#060814);border-radius:14px;padding:14px;}
+.hidden{display:none;}
+h1{font-size:18px;margin:6px 0;}
+.stats{display:flex;gap:16px;font-size:12px;color:var(--muted);}
+.online{display:flex;align-items:center;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#22ff00;opacity:.25;box-shadow:0 0 6px #22ff00;transition:.3s;}
 .dot.on{opacity:1;}
-video{
-  width:100%;
-  border-radius:12px;
-  background:#000;
-  opacity:0;
-  transform:scale(.98);
-  transition:.4s ease;
-}
+video{width:100%;border-radius:12px;background:#000;margin-top:10px;opacity:0;transform:scale(.98);transition:.4s ease;}
 video.ready{opacity:1;transform:scale(1);}
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:8px 12px;
-  font-size:13px;
-  border-radius:10px;
-  cursor:pointer;
-  background:#111827;
-  color:#fff;
-  border:1px solid #1f2937;
-}
-.btn.primary{
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  border:0;
-}
-select{
-  background:#111827;
-  color:#fff;
-  border-radius:10px;
-  border:1px solid #1f2937;
-  padding:6px;
-}
-.full-btn{
-  width:100%;
-  padding:14px;
-  font-size:15px;
-  font-weight:600;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:0;
-  color:#fff;
-  cursor:pointer;
-}
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:flex-end;
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
-}
+.controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{background:#111827;border:1px solid #1f2937;color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px;}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#2563eb);border:0;}
+select{background:#111827;color:#fff;border:1px solid #1f2937;border-radius:10px;padding:6px;}
+.full-btn{width:100%;margin-top:12px;padding:14px;font-size:15px;font-weight:600;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:0;color:#fff;cursor:pointer;}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.3s;z-index:999;}
 .popup.show{opacity:1;pointer-events:auto;}
-.popup-box{
-  width:100%;
-  max-width:720px;
-  background:#11141f;
-  border-radius:16px 16px 0 0;
-  padding:16px;
-  transform:translateY(40px);
-  transition:.3s;
-}
+.popup-box{width:100%;background:#0b1020;border-radius:16px 16px 0 0;padding:16px;transform:translateY(40px);transition:.3s;}
 .popup.show .popup-box{transform:translateY(0);}
-.popup-box a{
-  display:block;
-  margin-top:10px;
-  padding:12px;
-  border-radius:10px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  text-decoration:none;
-}
+.popup-box a{display:block;margin-top:10px;padding:12px;border-radius:10px;background:#111827;border:1px solid #1f2937;color:#fff;text-decoration:none;}
+#adblockWarning{display:none;position:fixed;top:0;left:0;width:100%;padding:12px;background:#ff4444;color:#fff;text-align:center;font-weight:700;z-index:1000;}
 </style>
 </head>
 <body>
 
+<div id="adblockWarning">Kami mendeteksi AdBlock! Beberapa fitur mungkin tidak berjalan.</div>
+
 <div class="wrap">
   <div id="app" class="card hidden">
+    <h1 id="title"></h1>
     <div class="stats">
       <div id="views">0 views</div>
       <div class="online">
@@ -147,27 +55,19 @@ select{
     <video id="player" playsinline></video>
 
     <div class="controls">
-      <button id="play" class="btn primary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
-        <span>Play</span>
-      </button>
-      <button id="mute" class="btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9 4.5v7l-5-3.5 5-3.5z"/></svg>
-        <span>Mute</span>
-      </button>
+      <button id="play" class="btn primary">Play</button>
+      <button id="mute" class="btn">Mute</button>
       <select id="speed">
-        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
         <option value="2">2x</option>
+        <option value="3">3x</option>
         <option value="5">5x</option>
         <option value="10">10x</option>
       </select>
-      <button id="fs" class="btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 1h5v1H2v4H1V1zm14 0v5h-1V2h-4V1h5zM1 15v-5h1v4h4v1H1zm14-5v5h-5v-1h4v-4h1z"/></svg>
-        <span>Fullscreen</span>
-      </button>
+      <button id="fullscreen" class="btn">Fullscreen</button>
     </div>
 
     <button id="openFull" class="full-btn">FULL KONTEN</button>
@@ -188,6 +88,7 @@ const firebaseConfig = {
   projectId: "stream-counter-b13fc",
   appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
 };
+
 const appFB = initializeApp(firebaseConfig);
 const db = getDatabase(appFB);
 
@@ -207,28 +108,36 @@ function initPlayer(video){
   const viewsEl=document.getElementById("views");
   const onlineEl=document.getElementById("onlineText");
   const dot=document.getElementById("dot");
-
+  document.getElementById("title").textContent=video.title;
   player.src=video.src;
   player.onloadeddata=()=>player.classList.add("ready");
 
+  // controls
   document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
   document.getElementById("mute").onclick=()=>player.muted=!player.muted;
   document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
-  document.getElementById("fs").onclick=()=>{player.requestFullscreen?.();};
+  document.getElementById("fullscreen").onclick=()=>{if(!document.fullscreenElement)player.requestFullscreen();else document.exitFullscreen();};
 
-  // FULL KONTEN POPUP
+  // skip keys
+  window.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+    if(e.code==='ArrowLeft'){player.currentTime=Math.max(0,player.currentTime-5);}
+    if(e.code==='ArrowRight'){player.currentTime=Math.min(player.duration||0,player.currentTime+5);}
+  });
+
+  // FULL KONTEN
   const popup=document.getElementById("popup");
   const box=document.getElementById("popupBox");
   document.getElementById("openFull").onclick=()=>{
     box.innerHTML="";
     (video.downloads||[]).forEach(d=>{
       const a=document.createElement("a");
-      a.href=d.url; a.target="_blank"; a.textContent=d.label;
+      a.href=d.url;a.target="_blank";a.textContent=d.label;
       box.appendChild(a);
     });
     popup.classList.add("show");
   };
-  popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
+  popup.onclick=e=>{if(e.target===popup)popup.classList.remove("show");};
 
   // VIEWS
   const vRef=ref(db,"views/"+vid);
@@ -246,13 +155,22 @@ function initPlayer(video){
     dot.classList.toggle("on",c>0);
   });
 
-  // POPUNDER IKLAN
-  setInterval(()=>{
-    const s=document.createElement('script');
-    s.dataset.zone='10109877';
-    s.src='https://al5sm.com/tag.min.js';
-    document.body.appendChild(s);
-  },10*60*1000); // setiap 10 menit
+  // Popunder iklan
+  (function(s){s.dataset.zone='10109877';s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+
+  // Adblock detection
+  function detectAdBlock(callback){
+    const test = document.createElement('div');
+    test.className='adsbox';
+    test.style.position='absolute';test.style.height='1px';
+    document.body.appendChild(test);
+    setTimeout(()=>{
+      const detected = (test.offsetHeight===0);
+      document.body.removeChild(test);
+      callback(detected);
+    },100);
+  }
+  detectAdBlock(blocked=>{if(blocked)document.getElementById('adblockWarning').style.display='block';});
 }
 </script>
 
