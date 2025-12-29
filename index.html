@@ -45,7 +45,6 @@ h1{font-size:18px;margin:6px 0}
 }
 .dot.on{opacity:1}
 
-/* ===== VIDEO PLAYER STYLE BARU ===== */
 video{
   width:100%;
   max-height:80vh;
@@ -87,7 +86,6 @@ select{
   padding:6px;
 }
 
-/* SEEK SLIDER */
 .seek-container{
   display:flex;
   align-items:center;
@@ -110,7 +108,6 @@ select{
   cursor:pointer;
 }
 
-/* FULL KONTEN BUTTON */
 .full-btn{
   width:100%;
   margin-top:12px;
@@ -124,7 +121,6 @@ select{
   cursor:pointer;
 }
 
-/* POPUP */
 .popup{
   position:fixed;
   inset:0;
@@ -229,11 +225,23 @@ const db = getDatabase(appFB);
 
 const vid = new URLSearchParams(location.search).get("v");
 
-fetch("videos.json?_="+Date.now())
-.then(r=>r.json())
-.then(data=>{
-  if(!vid || !data[vid]) return;
-  initPlayer(data[vid]);
+// ======= ambil data KV dulu, fallback ke videos.json
+async function getVideoData() {
+  try {
+    const res = await fetch(`/kvvideos?v=${vid}`);
+    if(!res.ok) throw new Error("KV error");
+    const data = await res.json();
+    return data[vid] ? data[vid] : null;
+  } catch {
+    const r = await fetch("videos.json?_=" + Date.now());
+    const data = await r.json();
+    return data[vid] ? data[vid] : null;
+  }
+}
+
+getVideoData().then(video=>{
+  if(!video) return;
+  initPlayer(video);
 });
 
 function initPlayer(video){
@@ -267,9 +275,7 @@ function initPlayer(video){
     seekSlider.value = val;
     timeEl.textContent = `${Math.floor(val/60)}:${String(Math.floor(val%60)).padStart(2,'0')}`;
   });
-  seekSlider.addEventListener('input',()=>{
-    player.currentTime = parseFloat(seekSlider.value);
-  });
+  seekSlider.addEventListener('input',()=>player.currentTime = parseFloat(seekSlider.value));
   player.addEventListener('loadedmetadata',()=>seekSlider.max=player.duration);
 
   // FULL KONTEN
@@ -286,17 +292,16 @@ function initPlayer(video){
   };
   popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
 
-  // VIEWS (FIX NUMBER)
+  // VIEWS
   const vRef=ref(db,"views/"+vid);
   runTransaction(vRef,cur=> (parseInt(cur)||0)+1);
   onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
 
-  // ONLINE (FIX STABLE)
+  // ONLINE
   const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
   const oRef=ref(db,"online/"+vid+"/"+sid);
   set(oRef,true);
   onDisconnect(oRef).remove();
-
   onValue(ref(db,"online/"+vid),s=>{
     const c=s.exists()?Object.keys(s.val()).length:0;
     onlineEl.textContent=c+" online";
