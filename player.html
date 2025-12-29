@@ -47,9 +47,10 @@ h1{font-size:18px;margin:6px 0}
 
 video{
   width:100%;
-  border-radius:12px;
+  border-radius:14px;
   background:#000;
-  margin-top:10px;
+  margin:12px 0;
+  object-fit:contain;
   opacity:0;
   transform:scale(.98);
   transition:.4s ease;
@@ -298,6 +299,19 @@ function initPlayer(video){
     const c=s.exists()?Object.keys(s.val()).length:0;
     onlineEl.textContent=c+" online";
     dot.classList.toggle("on",c>0);
+  });
+
+  // ===== KV TAMBAHAN =====
+  const extraRef = ref(db,"extra/"+vid);
+  runTransaction(extraRef,cur=>{
+    if(!cur) return { likes:0, category: video.category || "Uncategorized", author: video.author || "Unknown" };
+    return cur;
+  });
+  onValue(extraRef, s => {
+    const val = s.val() || {};
+    console.log("Extra KV:", val);
+    // Contoh menampilkan di UI (opsional):
+    // document.getElementById("author").textContent = val.author;
   });
 }
 
