@@ -42,9 +42,7 @@ h1{font-size:18px;margin:6px 0}
   opacity:.2;
 }
 .dot.on{animation:blink 1.2s infinite}
-@keyframes blink{
-  50%{opacity:1}
-}
+@keyframes blink{50%{opacity:1}}
 
 video{
   width:100%;
@@ -53,7 +51,7 @@ video{
   margin:12px 0;
 }
 
-/* ===== YT STYLE CONTROLS ===== */
+/* === CONTROLS === */
 .controls{
   display:flex;
   justify-content:center;
@@ -95,7 +93,20 @@ select{
   padding:0 10px;
 }
 
-/* ===== POPUP FULL ===== */
+/* FULL KONTEN BUTTON */
+.full-btn{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* POPUP */
 .popup{
   position:fixed;inset:0;
   background:rgba(0,0,0,.6);
@@ -113,9 +124,7 @@ select{
   transform:translateY(100%);
   animation:slideUp .4s forwards;
 }
-@keyframes slideUp{
-  to{transform:translateY(0)}
-}
+@keyframes slideUp{to{transform:translateY(0)}}
 .popup-box a{
   display:block;
   margin-top:10px;
@@ -127,7 +136,7 @@ select{
   text-decoration:none;
 }
 
-/* ===== CIHUY NOTIF ===== */
+/* CIHUY */
 #cihuy{
   position:fixed;
   left:50%;
@@ -136,7 +145,6 @@ select{
   font-size:22px;
   font-weight:700;
   animation:cihuy 2s ease forwards;
-  pointer-events:none;
 }
 @keyframes cihuy{
   0%{bottom:-50px;opacity:0}
@@ -172,7 +180,7 @@ select{
   </div>
 
   <button id="playBtn" class="play-btn">
-    <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
   </button>
 
   <div id="forward" class="ctrl">
@@ -187,7 +195,7 @@ select{
   </select>
 </div>
 
-<button id="openFull" class="ctrl" style="width:100%;margin-top:14px">FULL KONTEN</button>
+<button id="openFull" class="full-btn">FULL KONTEN</button>
 </div>
 </div>
 
@@ -227,7 +235,7 @@ forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTi
 fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
 speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-/* POPUP + CIHUY */
+/* FULL + CIHUY */
 openFull.onclick=()=>{
 popupBox.innerHTML='';
 (v.downloads||[]).forEach(d=>{
@@ -243,13 +251,18 @@ setTimeout(()=>n.remove(),2000);
 };
 popup.onclick=e=>e.target===popup&&popup.classList.remove('show');
 
-/* VIEWS */
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(n=>{
-fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify((n||0)+1)});
+/* VIEWS (ANTI OBJECT BUG) */
+fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(data=>{
+if(typeof data==='number'){
+fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
+}else{
+fetch(`${FIREBASE}/views/${id}/${Date.now()}.json`,{method:'PUT',body:1});
+}
 });
 setInterval(()=>{
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(n=>{
-views.textContent=(n||0)+' views';
+fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+let total=typeof d==='number'?d:(d?Object.keys(d).length:0);
+views.textContent=total+' views';
 });
 },3000);
 
