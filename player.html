@@ -47,10 +47,9 @@ h1{font-size:18px;margin:6px 0}
 
 video{
   width:100%;
-  border-radius:14px;
+  border-radius:12px;
   background:#000;
-  margin:12px 0;
-  object-fit:contain;
+  margin-top:10px;
   opacity:0;
   transform:scale(.98);
   transition:.4s ease;
@@ -85,6 +84,7 @@ select{
   padding:6px;
 }
 
+/* SEEK SLIDER */
 .seek-container{
   display:flex;
   align-items:center;
@@ -97,14 +97,17 @@ select{
   border-radius:6px;
   background:#1f2937;
   -webkit-appearance:none;
+  appearance:none;
 }
 .seek-slider::-webkit-slider-thumb{
   -webkit-appearance:none;
   width:14px;height:14px;
   border-radius:50%;
   background:var(--accent);
+  cursor:pointer;
 }
 
+/* FULL KONTEN BUTTON */
 .full-btn{
   width:100%;
   margin-top:12px;
@@ -118,6 +121,7 @@ select{
   cursor:pointer;
 }
 
+/* POPUP */
 .popup{
   position:fixed;
   inset:0;
@@ -155,6 +159,7 @@ select{
 
 <div class="wrap">
   <div id="app" class="card hidden">
+
     <h1 id="title"></h1>
 
     <div class="stats">
@@ -169,24 +174,32 @@ select{
 
     <div class="controls">
       <button id="play" class="btn primary">Play</button>
-
+      
       <div class="seek-container">
-        <input type="range" min="0" value="0" id="seek" class="seek-slider">
+        <input type="range" min="0" max="100" value="0" id="seek" class="seek-slider">
         <span id="time">0:00</span>
       </div>
 
       <button id="mute" class="btn">Mute</button>
       <select id="speed">
+        <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
         <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+        <option value="6">6x</option>
+        <option value="8">8x</option>
+        <option value="10">10x</option>
       </select>
 
       <button id="fullscreen" class="btn">Fullscreen</button>
     </div>
 
     <button id="openFull" class="full-btn">FULL KONTEN</button>
+
   </div>
 </div>
 
@@ -194,85 +207,105 @@ select{
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<script>
-const id = new URLSearchParams(location.search).get('v');
-let allowPlay = false; // KV FLAG
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getDatabase, ref, runTransaction,
+  onValue, set, onDisconnect
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-fetch('/videos')
+const firebaseConfig = {
+  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "stream-counter-b13fc",
+  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+const vid = new URLSearchParams(location.search).get("v");
+
+fetch("videos.json?_="+Date.now())
 .then(r=>r.json())
-.then(videos=>{
-  if(!id || !videos[id]) return;
+.then(data=>{
+  if(!vid || !data[vid]) return;
+  initPlayer(data[vid]);
+});
 
-  const v = videos[id];
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('title').textContent = v.title;
+function initPlayer(video){
+  const app=document.getElementById("app");
+  app.classList.remove("hidden");
 
-  const player = document.getElementById('player');
-  player.src = v.src;
+  const player=document.getElementById("player");
+  const viewsEl=document.getElementById("views");
+  const onlineEl=document.getElementById("onlineText");
+  const dot=document.getElementById("dot");
+  const seekSlider=document.getElementById("seek");
+  const timeEl=document.getElementById("time");
 
-  player.onloadeddata=()=>player.classList.add('ready');
+  document.getElementById("title").textContent=video.title;
+  player.src=video.src;
 
-  // ===== KV CLICK WINDOWS (IKLAN KE-2) =====
-  player.addEventListener('play',e=>{
-    if(!allowPlay){
-      e.preventDefault();
-      player.pause();
-      allowPlay=true;
-      document.body.click();
-      setTimeout(()=>player.play(),300);
-    }
-  });
+  player.onloadeddata=()=>player.classList.add("ready");
 
-  const playBtn=document.getElementById('play');
-  playBtn.onclick=()=>player.paused?player.play():player.pause();
+  document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
+  document.getElementById("mute").onclick=()=>player.muted=!player.muted;
+  document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  document.getElementById('mute').onclick=()=>player.muted=!player.muted;
-  document.getElementById('speed').onchange=e=>player.playbackRate=parseFloat(e.target.value);
-
-  document.getElementById('fullscreen').onclick=()=>{
+  document.getElementById("fullscreen").onclick=()=> {
     if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
     else document.exitFullscreen();
   };
 
-  const seek=document.getElementById('seek');
-  const time=document.getElementById('time');
+  // SEEK BAR UPDATE
+  player.addEventListener('timeupdate',()=>{
+    const val = player.currentTime;
+    seekSlider.value = val;
+    timeEl.textContent = `${Math.floor(val/60)}:${String(Math.floor(val%60)).padStart(2,'0')}`;
+  });
+  seekSlider.addEventListener('input',()=>{
+    player.currentTime = parseFloat(seekSlider.value);
+  });
+  player.addEventListener('loadedmetadata',()=>seekSlider.max=player.duration);
 
-  player.onloadedmetadata=()=>seek.max=player.duration;
-  player.ontimeupdate=()=>{
-    seek.value=player.currentTime;
-    time.textContent=
-      Math.floor(player.currentTime/60)+":"+
-      String(Math.floor(player.currentTime%60)).padStart(2,"0");
-  };
-  seek.oninput=()=>player.currentTime=seek.value;
-
-  // ===== POPUP FULL KONTEN =====
-  const popup=document.getElementById('popup');
-  const box=document.getElementById('popupBox');
-  document.getElementById('openFull').onclick=()=>{
-    box.innerHTML='';
-    (v.downloads||[]).forEach(d=>{
-      const a=document.createElement('a');
-      a.href=d.url;a.target='_blank';a.textContent=d.label;
+  // FULL KONTEN
+  const popup=document.getElementById("popup");
+  const box=document.getElementById("popupBox");
+  document.getElementById("openFull").onclick=()=>{
+    box.innerHTML="";
+    (video.downloads||[]).forEach(d=>{
+      const a=document.createElement("a");
+      a.href=d.url;a.target="_blank";a.textContent=d.label;
       box.appendChild(a);
     });
-    popup.classList.add('show');
+    popup.classList.add("show");
   };
-  popup.onclick=e=>{if(e.target===popup) popup.classList.remove('show')};
-});
-</script>
+  popup.onclick=e=>{ if(e.target===popup) popup.classList.remove("show"); };
 
-<!-- HISTATS -->
-<iframe src="histats.html" style="display:none"></iframe>
+  // VIEWS (FIX NUMBER)
+  const vRef=ref(db,"views/"+vid);
+  runTransaction(vRef,cur=> (parseInt(cur)||0)+1);
+  onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
 
-<!-- POPUNDER BIASA (IKLAN KE-1) -->
-<script>
+  // ONLINE (FIX STABLE)
+  const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
+  const oRef=ref(db,"online/"+vid+"/"+sid);
+  set(oRef,true);
+  onDisconnect(oRef).remove();
+
+  onValue(ref(db,"online/"+vid),s=>{
+    const c=s.exists()?Object.keys(s.val()).length:0;
+    onlineEl.textContent=c+" online";
+    dot.classList.toggle("on",c>0);
+  });
+}
+
+// ====== POPUNDER ======
 (function(s){
-  s.dataset.zone='9713245';
+  s.dataset.zone='10109877';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean)
-  .pop()
-  .appendChild(document.createElement('script')));
+})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
 
 </body>
