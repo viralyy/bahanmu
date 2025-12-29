@@ -23,7 +23,7 @@ body{
 .wrap{max-width:720px;margin:auto;padding:14px}
 .card{
   background:linear-gradient(180deg,#0b1020,#060814);
-  border-radius:16px;
+  border-radius:14px;
   padding:14px;
 }
 .hidden{display:none}
@@ -39,13 +39,11 @@ h1{font-size:18px;margin:6px 0}
 .dot{
   width:8px;height:8px;border-radius:50%;
   background:#22ff00;
-  opacity:.2;
+  opacity:.25;
+  box-shadow:0 0 6px #22ff00;
+  transition:.3s;
 }
-.dot.on{animation:blink 1.2s infinite}
-@keyframes blink{
-  0%,100%{opacity:.2}
-  50%{opacity:1}
-}
+.dot.on{opacity:1}
 
 video{
   width:100%;
@@ -53,66 +51,76 @@ video{
   background:#000;
   margin:12px 0;
   object-fit:contain;
+  opacity:0;
+  transform:scale(.98);
+  transition:.4s ease;
 }
+video.ready{opacity:1;transform:scale(1)}
 
-/* ===== CONTROLS ===== */
+/* ===== CONTROLS YT MODE ===== */
 .controls{
   display:grid;
-  grid-template-columns:auto auto auto auto auto;
-  justify-content:center;
+  grid-template-columns:1fr auto 1fr;
   align-items:center;
-  gap:14px;
   margin-top:14px;
 }
+.controls-left,
+.controls-right{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.controls-left{justify-content:flex-start}
+.controls-right{justify-content:flex-end}
+.controls-center{display:flex;justify-content:center}
+
 .btn{
-  width:44px;
-  height:44px;
+  width:42px;height:42px;
+  border-radius:50%;
   background:#111827;
-  border:1px solid #1f2937;
-  border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 }
-.btn svg{width:20px;height:20px;fill:#fff}
+.btn svg{width:22px;height:22px;fill:#fff}
 
 .play-btn{
-  width:72px;
-  height:72px;
+  width:70px;height:70px;
   border-radius:50%;
   border:none;
   background:linear-gradient(135deg,var(--accent),#2563eb);
   display:flex;
   align-items:center;
   justify-content:center;
+  box-shadow:0 12px 30px rgba(59,130,246,.45);
   cursor:pointer;
-  box-shadow:0 14px 34px rgba(59,130,246,.45);
   transition:.25s;
 }
-.play-btn:active{transform:scale(.9) rotate(6deg)}
-.play-btn svg{width:28px;height:28px;fill:#fff}
+.play-btn:active{transform:scale(.9)}
+.play-btn svg{width:34px;height:34px;fill:#fff}
 
 select{
   background:#111827;
   border:1px solid #1f2937;
   color:#fff;
-  padding:8px;
   border-radius:10px;
+  padding:6px 10px;
 }
 
-#openFull{
-  margin-top:14px;
+/* ===== FULL KONTEN ===== */
+.small-btn{
   width:100%;
+  margin-top:14px;
   padding:14px;
-  border-radius:14px;
-  background:#111827;
+  border-radius:12px;
   border:1px solid #1f2937;
+  background:#111827;
   color:#fff;
   cursor:pointer;
 }
 
-/* popup */
+/* ===== POPUP ===== */
 .popup{
   position:fixed;
   inset:0;
@@ -129,12 +137,10 @@ select{
   background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
-  transform:translateY(40px);
-  animation:slideUp .35s ease forwards;
+  transform:translateY(100%);
+  transition:.35s ease;
 }
-@keyframes slideUp{
-  to{transform:translateY(0)}
-}
+.popup.show .popup-box{transform:translateY(0)}
 .popup-box a{
   display:block;
   margin-top:10px;
@@ -146,22 +152,25 @@ select{
   text-decoration:none;
 }
 
-/* notif */
-.toast{
+/* ===== CIHUY NOTIF ===== */
+#cihuy{
   position:fixed;
   left:50%;
-  bottom:-40px;
+  bottom:-80px;
   transform:translateX(-50%);
-  background:#111827;
-  border:1px solid #1f2937;
-  padding:10px 16px;
-  border-radius:12px;
+  font-size:32px;
+  font-weight:700;
   opacity:0;
-  transition:.4s;
+  pointer-events:none;
 }
-.toast.show{
-  bottom:30px;
-  opacity:1;
+#cihuy.show{
+  animation:cihuy 1.8s ease forwards;
+}
+@keyframes cihuy{
+  0%{bottom:-80px;opacity:0}
+  30%{opacity:1}
+  50%{bottom:50%;opacity:1}
+  100%{bottom:110%;opacity:0}
 }
 </style>
 </head>
@@ -184,36 +193,35 @@ select{
 
     <!-- CONTROLS -->
     <div class="controls">
-      <!-- fullscreen -->
-      <div id="fs" class="btn">
-        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
+      <div class="controls-left">
+        <div id="fs" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
+        </div>
+        <div id="rewind" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12 11 18z"/></svg>
+        </div>
       </div>
 
-      <!-- rewind -->
-      <div id="rewind" class="btn">
-        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12 11 18z"/></svg>
+      <div class="controls-center">
+        <button id="playBtn" class="play-btn">
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
       </div>
 
-      <!-- play -->
-      <button id="playBtn" class="play-btn">
-        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-
-      <!-- forward -->
-      <div id="forward" class="btn">
-        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6z"/></svg>
+      <div class="controls-right">
+        <div id="forward" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6z"/></svg>
+        </div>
+        <select id="speed">
+          <option value="1">1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
       </div>
-
-      <!-- speed -->
-      <select id="speed">
-        <option value="1">1x</option>
-        <option value="1.25">1.25x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
     </div>
 
-    <button id="openFull">FULL KONTEN</button>
+    <button id="openFull" class="small-btn">FULL KONTEN</button>
   </div>
 </div>
 
@@ -221,100 +229,89 @@ select{
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<div id="toast" class="toast">CIHUY🗿</div>
+<div id="cihuy">CIHUY🗿</div>
 
 <script>
-const id = new URLSearchParams(location.search).get('v');
-let allowPlay = false;
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
+const id=new URLSearchParams(location.search).get('v');
+let allowPlay=false;
+let session=Math.random().toString(36).slice(2);
 
-fetch('/videos')
-.then(r=>r.json())
-.then(videos=>{
-  if(!id||!videos[id])return;
-  const v=videos[id];
-  app.classList.remove('hidden');
-  title.textContent=v.title;
-  player.src=v.src;
+fetch('/videos').then(r=>r.json()).then(videos=>{
+if(!id||!videos[id])return;
+const v=videos[id];
+app.classList.remove('hidden');
+title.textContent=v.title;
+player.src=v.src;
+player.onloadeddata=()=>player.classList.add('ready');
 
-  // iklan logic LU (TETAP)
-  player.addEventListener('play',e=>{
-    if(!allowPlay){
-      e.preventDefault();
-      player.pause();
-      allowPlay=true;
-      document.body.click();
-      setTimeout(()=>player.play(),300);
-    }
-  });
-
-  playBtn.onclick=()=>{
-    if(player.paused){
-      player.play();
-      playIcon.innerHTML='<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
-    }else{
-      player.pause();
-      playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
-    }
-  };
-
-  rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
-  forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-  speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
-  fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
-
-  openFull.onclick=()=>{
-    popupBox.innerHTML='';
-    (v.downloads||[]).forEach(d=>{
-      const a=document.createElement('a');
-      a.href=d.url;a.target='_blank';a.textContent=d.label;
-      popupBox.appendChild(a);
-    });
-    popup.classList.add('show');
-
-    toast.classList.add('show');
-    setTimeout(()=>toast.classList.remove('show'),2000);
-  };
-  popup.onclick=e=>{if(e.target===popup)popup.classList.remove('show')};
-});
-
-/* ===== VIEWS ===== */
-fetch(`${FIREBASE}/views/${id}.json`)
-.then(r=>r.json())
-.then(n=>{
-  n=(n||0)+1;
-  fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:n});
-  views.textContent=n+' views';
-});
-
-/* ===== ONLINE ===== */
-const uid=Math.random().toString(36).slice(2);
-function heartbeat(){
-  fetch(`${FIREBASE}/online/${id}/${uid}.json`,{method:'PUT',body:Date.now()});
+/* IKLAN KE-2 */
+player.addEventListener('play',e=>{
+if(!allowPlay){
+e.preventDefault();
+player.pause();
+allowPlay=true;
+document.body.click();
+setTimeout(()=>player.play(),300);
 }
-heartbeat();
-setInterval(heartbeat,4000);
+});
 
+/* CONTROLS */
+playBtn.onclick=()=>{
+if(player.paused){
+player.play();
+playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+}else{
+player.pause();
+playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+}
+};
+rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
+forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
+fs.onclick=()=>document.fullscreenElement?document.exitFullscreen():player.requestFullscreen();
+speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
+
+/* VIEWS */
+fetch(`${FIREBASE}/views/${id}.json`,{method:'POST',body:1});
 setInterval(()=>{
-  fetch(`${FIREBASE}/online/${id}.json`)
-  .then(r=>r.json())
-  .then(d=>{
-    let c=0,now=Date.now();
-    for(let k in d) if(now-d[k]<8000) c++;
-    onlineText.textContent=c+' online';
-    dot.classList.toggle('on',c>0);
-  });
-},3000);
+fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+views.textContent=(d?Object.keys(d).length:0)+' views';
+});
+},2000);
+
+/* ONLINE */
+fetch(`${FIREBASE}/online/${id}/${session}.json`,{method:'PUT',body:1});
+setInterval(()=>{
+fetch(`${FIREBASE}/online/${id}/${session}.json`,{method:'PUT',body:1});
+fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
+let n=d?Object.keys(d).length:0;
+onlineText.textContent=n+' online';
+dot.classList.toggle('on',n>0);
+});
+},4000);
+
+/* FULL KONTEN */
+openFull.onclick=()=>{
+popupBox.innerHTML='';
+(v.downloads||[]).forEach(d=>{
+let a=document.createElement('a');
+a.href=d.url;a.target='_blank';a.textContent=d.label;
+popupBox.appendChild(a);
+});
+popup.classList.add('show');
+cihuy.classList.add('show');
+setTimeout(()=>cihuy.classList.remove('show'),1800);
+};
+popup.onclick=e=>{if(e.target===popup)popup.classList.remove('show')};
+});
 </script>
 
-<!-- IKLAN KE-1 JANGAN DIHAPUS -->
+<!-- IKLAN KE-1 -->
 <script>
 (function(s){
-  s.dataset.zone='10109877';
-  s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean)
-  .pop()
-  .appendChild(document.createElement('script')));
+s.dataset.zone='10109877';
+s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
 
 </body>
