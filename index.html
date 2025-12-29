@@ -24,7 +24,7 @@ body{
 .card{
   background:linear-gradient(180deg,#0b1020,#060814);
   border-radius:16px;
-  padding:16px;
+  padding:14px;
 }
 .hidden{display:none}
 
@@ -35,81 +35,95 @@ h1{font-size:18px;margin:6px 0}
   font-size:12px;
   color:var(--muted);
 }
+.online{display:flex;align-items:center;gap:6px}
 .dot{
   width:8px;height:8px;border-radius:50%;
   background:#22ff00;
-  opacity:.25;
-  box-shadow:0 0 6px #22ff00;
+  opacity:.2;
 }
-.dot.on{opacity:1}
+.dot.on{animation:blink 1.2s infinite}
+@keyframes blink{
+  0%,100%{opacity:.2}
+  50%{opacity:1}
+}
 
+.video-wrap{
+  position:relative;
+  margin:12px 0;
+}
 video{
   width:100%;
-  aspect-ratio:16/9;
   border-radius:14px;
   background:#000;
-  margin:12px 0;
   object-fit:contain;
 }
 
-/* ===== CONTROLS ===== */
+/* ===== YT STYLE CONTROLS ===== */
 .controls{
   display:grid;
-  grid-template-columns:auto 1fr auto;
+  grid-template-columns:1fr auto 1fr;
   align-items:center;
+  gap:12px;
   margin-top:14px;
 }
-.left,.right{
+.ctrl-left,
+.ctrl-right{
   display:flex;
   gap:10px;
+  align-items:center;
 }
-.center{display:flex;justify-content:center}
+.ctrl-left{justify-content:flex-end}
+.ctrl-right{justify-content:flex-start}
 
-.icon-btn{
+.btn{
   background:#111827;
   border:1px solid #1f2937;
-  border-radius:12px;
   width:44px;
   height:44px;
+  border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 }
-.icon-btn svg{width:22px;height:22px;fill:#fff}
+.btn svg{width:20px;height:20px;fill:#fff}
 
-.play-btn{
-  width:64px;height:64px;
+.play-big{
+  width:72px;
+  height:72px;
   border-radius:50%;
-  border:none;
   background:linear-gradient(135deg,var(--accent),#2563eb);
+  border:none;
   display:flex;
   align-items:center;
   justify-content:center;
+  box-shadow:0 14px 34px rgba(59,130,246,.45);
   cursor:pointer;
-  box-shadow:0 10px 28px rgba(59,130,246,.45);
 }
-.play-btn svg{width:28px;height:28px;fill:#fff}
-.play-btn .pause{display:none}
-.play-btn.playing .play{display:none}
-.play-btn.playing .pause{display:block}
+.play-big svg{
+  width:28px;height:28px;fill:#fff;
+}
+.play-big.pause svg{
+  width:26px;height:26px;
+}
 
 select{
   background:#111827;
-  color:#fff;
   border:1px solid #1f2937;
+  color:#fff;
+  padding:8px 10px;
   border-radius:10px;
-  padding:8px;
 }
 
-.full-btn{
-  width:100%;
+#openFull{
   margin-top:14px;
-  padding:12px;
+  width:100%;
+  padding:14px;
+  border-radius:14px;
   background:#111827;
   border:1px solid #1f2937;
   color:#fff;
-  border-radius:12px;
+  cursor:pointer;
 }
 
 /* popup */
@@ -121,6 +135,7 @@ select{
   align-items:flex-end;
   opacity:0;
   pointer-events:none;
+  transition:.3s;
 }
 .popup.show{opacity:1;pointer-events:auto}
 .popup-box{
@@ -131,11 +146,11 @@ select{
 }
 .popup-box a{
   display:block;
+  margin-top:10px;
   padding:12px;
-  margin-top:8px;
+  border-radius:10px;
   background:#111827;
   border:1px solid #1f2937;
-  border-radius:10px;
   color:#fff;
   text-decoration:none;
 }
@@ -143,99 +158,148 @@ select{
 </head>
 
 <body>
+
 <div class="wrap">
   <div id="app" class="card hidden">
     <h1 id="title"></h1>
+
     <div class="stats">
-      <span id="views">0 views</span>
-      <span><span id="dot" class="dot"></span> <span id="online">0 online</span></span>
+      <div id="views">0 views</div>
+      <div class="online">
+        <div id="dot" class="dot"></div>
+        <span id="onlineText">0 online</span>
+      </div>
     </div>
 
-    <video id="player" playsinline></video>
+    <div class="video-wrap">
+      <video id="player" playsinline></video>
+    </div>
 
+    <!-- CONTROLS -->
     <div class="controls">
-      <div class="left">
-        <button id="rew" class="icon-btn">
-          <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12 11 18zm1-6 8.5 6V6L12 12z"/></svg>
-        </button>
-        <button id="fs" class="icon-btn">
-          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 9h-3v2h5v-5h-2v3zm0-14V7h-3v2h5V5h-2z"/></svg>
-        </button>
+      <div class="ctrl-left">
+        <div id="rewind" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6L11 18zm1-12v12l8.5-6L12 6z"/></svg>
+        </div>
       </div>
 
-      <div class="center">
-        <button id="playBtn" class="play-btn">
-          <svg class="play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-        </button>
-      </div>
+      <button id="playBtn" class="play-big">
+        <svg id="playIcon" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
 
-      <div class="right">
-        <button id="fwd" class="icon-btn">
-          <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zM11 12 2.5 6v12L11 12z"/></svg>
-        </button>
+      <div class="ctrl-right">
+        <div id="forward" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zM11 18V6L2.5 12 11 18z"/></svg>
+        </div>
+
         <select id="speed">
           <option value="1">1x</option>
           <option value="1.25">1.25x</option>
           <option value="1.5">1.5x</option>
           <option value="2">2x</option>
         </select>
+
+        <div id="fs" class="btn">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
+        </div>
       </div>
     </div>
 
-    <button id="fullBtn" class="full-btn">FULL KONTEN</button>
+    <button id="openFull">FULL KONTEN</button>
   </div>
 </div>
 
-<div id="popup" class="popup"><div id="popupBox" class="popup-box"></div></div>
+<div id="popup" class="popup">
+  <div class="popup-box" id="popupBox"></div>
+</div>
 
 <script>
-const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
-const id=new URLSearchParams(location.search).get('v');
+const id = new URLSearchParams(location.search).get('v');
+let allowPlay = false;
+const FIREBASE = 'https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 
-fetch('/videos').then(r=>r.json()).then(v=>{
-  if(!v[id])return;
-  const d=v[id];
+fetch('/videos')
+.then(r=>r.json())
+.then(videos=>{
+  if(!id || !videos[id]) return;
+  const v = videos[id];
   app.classList.remove('hidden');
-  title.textContent=d.title;
-  player.src=d.src;
+  title.textContent = v.title;
 
-  playBtn.onclick=()=>player.paused?player.play():player.pause();
-  player.onplay=()=>playBtn.classList.add('playing');
-  player.onpause=()=>playBtn.classList.remove('playing');
+  player.src = v.src;
 
-  rew.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
-  fwd.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-  fs.onclick=()=>player.requestFullscreen();
+  // iklan logic lu
+  player.addEventListener('play',e=>{
+    if(!allowPlay){
+      e.preventDefault();
+      player.pause();
+      allowPlay=true;
+      document.body.click();
+      setTimeout(()=>player.play(),300);
+    }
+  });
+
+  playBtn.onclick=()=>{
+    if(player.paused){
+      player.play();
+      playBtn.classList.add('pause');
+      playIcon.innerHTML='<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+    }else{
+      player.pause();
+      playBtn.classList.remove('pause');
+      playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+    }
+  };
+
+  rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
+  forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
   speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
+  fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
 
-  fullBtn.onclick=()=>{
+  openFull.onclick=()=>{
     popupBox.innerHTML='';
-    d.downloads.forEach(x=>{
-      let a=document.createElement('a');
-      a.href=x.url;a.target='_blank';a.textContent=x.label;
+    (v.downloads||[]).forEach(d=>{
+      const a=document.createElement('a');
+      a.href=d.url;a.target='_blank';a.textContent=d.label;
       popupBox.appendChild(a);
     });
     popup.classList.add('show');
   };
-  popup.onclick=e=>e.target===popup&&popup.classList.remove('show');
-
-  fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(n=>{
-    n=(n||0)+1;
-    fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:n});
-    views.textContent=n+' views';
-  });
-
-  const uid=Math.random().toString(36).slice(2);
-  fetch(`${FIREBASE}/online/${id}/${uid}.json`,{method:'PUT',body:1});
-  setInterval(()=>{
-    fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(o=>{
-      const c=o?Object.keys(o).length:0;
-      online.textContent=c+' online';
-      dot.classList.toggle('on',c>0);
-    });
-  },3000);
+  popup.onclick=e=>{if(e.target===popup) popup.classList.remove('show')};
 });
+
+/* ===== VIEWS + ONLINE ===== */
+const uid=Math.random().toString(36).slice(2);
+fetch(`${FIREBASE}/views/${id}.json`,{method:'POST'});
+
+setInterval(()=>{
+  fetch(`${FIREBASE}/views/${id}.json`)
+  .then(r=>r.json())
+  .then(d=>views.textContent=(d?Object.keys(d).length:0)+' views');
+},3000);
+
+function heartbeat(){
+  fetch(`${FIREBASE}/online/${id}/${uid}.json`,{
+    method:'PUT',
+    body:Date.now()
+  });
+}
+heartbeat();
+setInterval(heartbeat,4000);
+
+setInterval(()=>{
+  fetch(`${FIREBASE}/online/${id}.json`)
+  .then(r=>r.json())
+  .then(d=>{
+    let c=0,now=Date.now();
+    for(let k in d) if(now-d[k]<8000) c++;
+    onlineText.textContent=c+' online';
+    dot.classList.toggle('on',c>0);
+  });
+},3000);
 </script>
+
 </body>
 </html>
