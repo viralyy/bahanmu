@@ -57,13 +57,12 @@ video{
 }
 video.ready{opacity:1;transform:scale(1)}
 
-/* ===== PRO PLAYER CONTROLS ===== */
+/* ===== PRO CONTROLS ===== */
 .pro-controls{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   margin-top:14px;
-  gap:12px;
 }
 .pro-side{
   width:90px;
@@ -76,6 +75,8 @@ video.ready{opacity:1;transform:scale(1)}
   display:flex;
   justify-content:center;
 }
+
+/* === YT STYLE PLAY === */
 .circle-play{
   width:68px;
   height:68px;
@@ -86,9 +87,13 @@ video.ready{opacity:1;transform:scale(1)}
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  position:relative;
   box-shadow:0 12px 30px rgba(59,130,246,.45);
+  overflow:hidden;
 }
-.circle-play:active{transform:scale(.94)}
+.circle-play.spin{animation:spin .5s}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 .play-icon{
   width:0;height:0;
   border-left:20px solid #fff;
@@ -96,53 +101,48 @@ video.ready{opacity:1;transform:scale(1)}
   border-bottom:12px solid transparent;
   margin-left:4px;
 }
+.pause-icon{
+  display:flex;
+  gap:6px;
+  position:absolute;
+  opacity:0;
+}
+.pause-icon span{
+  width:6px;height:26px;
+  background:#fff;border-radius:2px;
+}
+.circle-play.playing .play-icon{opacity:0}
+.circle-play.playing .pause-icon{opacity:1}
+
 .small-btn{
   background:#111827;
   border:1px solid #1f2937;
   color:#fff;
   padding:8px;
   border-radius:10px;
-  font-size:12px;
   cursor:pointer;
-  text-align:center;
 }
-.small-btn select{
-  width:100%;
-  background:transparent;
-  border:none;
-  color:#fff;
-}
+.small-btn svg{display:block;margin:auto}
 
-/* ===== POPUP ===== */
+/* popup */
 .popup{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:flex-end;
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
+  display:flex;align-items:flex-end;
+  opacity:0;pointer-events:none;
 }
 .popup.show{opacity:1;pointer-events:auto}
 .popup-box{
   width:100%;
   background:#0b1020;
-  border-radius:16px 16px 0 0;
   padding:16px;
-  transform:translateY(40px);
-  transition:.3s;
+  border-radius:16px 16px 0 0;
 }
-.popup.show .popup-box{transform:translateY(0)}
 .popup-box a{
-  display:block;
-  margin-top:10px;
-  padding:12px;
-  border-radius:10px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  text-decoration:none;
+  display:block;margin-top:10px;
+  padding:12px;border-radius:10px;
+  background:#111827;border:1px solid #1f2937;
+  color:#fff;text-decoration:none;
 }
 </style>
 </head>
@@ -163,29 +163,37 @@ video.ready{opacity:1;transform:scale(1)}
 
     <video id="player" playsinline></video>
 
-    <!-- PRO PLAYER CONTROLS -->
     <div class="pro-controls">
       <div class="pro-side">
-        <button id="rewind5" class="small-btn">⏪ -5s</button>
-        <button id="fs2" class="small-btn">⛶ Full</button>
+        <button id="rewind5" class="small-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <polygon points="11,19 2,12 11,5"/>
+            <polygon points="22,19 13,12 22,5"/>
+          </svg>
+        </button>
+        <button id="fs2" class="small-btn">⛶</button>
       </div>
 
       <div class="pro-center">
         <button id="bigPlay" class="circle-play">
           <div class="play-icon"></div>
+          <div class="pause-icon"><span></span><span></span></div>
         </button>
       </div>
 
       <div class="pro-side">
-        <button id="forward5" class="small-btn">+5s ⏩</button>
-        <div class="small-btn">
-          <select id="speed2">
-            <option value="1">1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-          </select>
-        </div>
+        <button id="forward5" class="small-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <polygon points="13,5 22,12 13,19"/>
+            <polygon points="2,5 11,12 2,19"/>
+          </svg>
+        </button>
+        <select id="speed2" class="small-btn">
+          <option value="1">1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
       </div>
     </div>
 
@@ -199,45 +207,49 @@ video.ready{opacity:1;transform:scale(1)}
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<script>
+<!-- ================= MAIN SCRIPT ================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, onDisconnect, increment, update }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+/* === FIREBASE CONFIG (GANTI PUNYA LU) === */
+const firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX",
+  databaseURL: "XXXX",
+  projectId: "XXXX",
+};
+const appFB = initializeApp(firebaseConfig);
+const db = getDatabase(appFB);
+
+/* === VIDEO LOAD === */
 const id = new URLSearchParams(location.search).get('v');
-let allowPlay = false;
+const player = document.getElementById('player');
 
-fetch('/videos')
-.then(r=>r.json())
-.then(videos=>{
-  if(!id || !videos[id]) return;
-
+fetch('/videos').then(r=>r.json()).then(videos=>{
+  if(!videos[id]) return;
   const v = videos[id];
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('title').textContent = v.title;
-
-  const player = document.getElementById('player');
+  app.classList.remove('hidden');
+  title.textContent = v.title;
   player.src = v.src;
   player.onloadeddata=()=>player.classList.add('ready');
 
-  // ===== IKLAN KE-2 =====
-  player.addEventListener('play',e=>{
-    if(!allowPlay){
-      e.preventDefault();
-      player.pause();
-      allowPlay=true;
-      document.body.click();
-      setTimeout(()=>player.play(),300);
-    }
-  });
+  /* === PLAY UI === */
+  bigPlay.onclick=()=>{
+    bigPlay.classList.add('spin');
+    setTimeout(()=>bigPlay.classList.remove('spin'),500);
+    player.paused?player.play():player.pause();
+  };
+  player.onplay=()=>bigPlay.classList.add('playing');
+  player.onpause=()=>bigPlay.classList.remove('playing');
 
-  // PRO CONTROLS
-  bigPlay.onclick=()=>player.paused?player.play():player.pause();
   rewind5.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
   forward5.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-  fs2.onclick=()=>{
-    if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
-    else document.exitFullscreen();
-  };
+  fs2.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
   speed2.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  // POPUP FULL
+  /* === FULL KONTEN === */
   openFull.onclick=()=>{
     popupBox.innerHTML='';
     (v.downloads||[]).forEach(d=>{
@@ -247,21 +259,26 @@ fetch('/videos')
     });
     popup.classList.add('show');
   };
-  popup.onclick=e=>{if(e.target===popup) popup.classList.remove('show')};
+  popup.onclick=e=>e.target===popup&&popup.classList.remove('show');
+
+  /* === VIEWS === */
+  const viewsRef = ref(db,'views/'+id);
+  update(viewsRef,{count:increment(1)});
+  onValue(viewsRef,s=>{
+    views.textContent=(s.val()?.count||0)+" views";
+  });
+
+  /* === ONLINE === */
+  const uid = Math.random().toString(36).slice(2);
+  const onlineRef = ref(db,'online/'+id+'/'+uid);
+  set(onlineRef,true);
+  onDisconnect(onlineRef).remove();
+  onValue(ref(db,'online/'+id),s=>{
+    const c=s.exists()?Object.keys(s.val()).length:0;
+    onlineText.textContent=c+" online";
+    dot.classList.toggle('on',c>0);
+  });
 });
-</script>
-
-<!-- HISTATS -->
-<iframe src="histats.html" style="display:none"></iframe>
-
-<!-- IKLAN KE-1 -->
-<script>
-(function(s){
-  s.dataset.zone='10109877';
-  s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean)
-  .pop()
-  .appendChild(document.createElement('script')));
 </script>
 
 </body>
