@@ -27,9 +27,12 @@ body{
 }
 video{
   width:100%;
+  height:auto;
+  max-height:80vh;
   border-radius:14px;
   background:#000;
-  margin:12px 0
+  margin:12px 0;
+  object-fit:contain;
 }
 h2,h3{margin:8px 0;font-weight:600}
 p{color:#aaa;font-size:14px}
@@ -51,25 +54,89 @@ p{color:#aaa;font-size:14px}
 
 <body>
 
-<div class="page center" id="empty">
+<!-- EMPTY STATE -->
+<div class="page center hidden" id="empty">
   <h2>Video tidak tersedia</h2>
   <p>Gunakan link stream yang valid</p>
 </div>
 
+<!-- WATCH -->
 <div class="page hidden" id="watch">
   <h3 id="title"></h3>
   <video id="player" controls playsinline></video>
+  <div id="downloads"></div>
+</div>
 
-<div id="downloads"></div>
+<script>
+const id = new URLSearchParams(location.search).get('v');
+const empty = document.getElementById('empty');
+const watch = document.getElementById('watch');
+const player = document.getElementById('player');
 
-<script src="app.js"></script>
+let allowPlay = false; // click windows flag
 
+if(!id){
+  empty.classList.remove('hidden');
+}else{
+  fetch('/videos')
+    .then(r => r.json())
+    .then(videos => {
+      const v = videos[id];
+
+      if(!v){
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      watch.classList.remove('hidden');
+      document.getElementById('title').textContent = v.title;
+
+      // STREAM VIDEO
+      player.src = v.src;
+      player.load();
+
+      // CLICK WINDOWS IKLAN (IKLAN KE-2)
+      player.addEventListener('play', function(e){
+        if(!allowPlay){
+          e.preventDefault();
+          player.pause();
+
+          allowPlay = true;
+
+          // trigger click window
+          document.body.click();
+
+          setTimeout(() => {
+            player.play();
+          }, 300);
+        }
+      });
+
+      // DOWNLOAD BUTTONS
+      const dl = document.getElementById('downloads');
+      dl.innerHTML = '';
+      v.downloads.forEach(d => {
+        const a = document.createElement('a');
+        a.className = 'btn';
+        a.href = d.url;
+        a.target = '_blank';
+        a.textContent = d.label;
+        dl.appendChild(a);
+      });
+    })
+    .catch(() => {
+      empty.classList.remove('hidden');
+    });
+}
+</script>
+
+<!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
-<!-- POPUNDER -->
+<!-- POPUNDER BIASA (IKLAN KE-1) -->
 <script>
 (function(s){
-  s.dataset.zone='10109877';
+  s.dataset.zone='9713245';
   s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement, document.body].filter(Boolean)
   .pop()
