@@ -57,67 +57,63 @@ video{
 }
 video.ready{opacity:1;transform:scale(1)}
 
-.controls{
+/* ===== PRO PLAYER CONTROLS ===== */
+.pro-controls{
   display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:14px;
+  gap:12px;
+}
+.pro-side{
+  width:90px;
+  display:flex;
+  flex-direction:column;
   gap:8px;
-  margin-top:10px;
-  flex-wrap:wrap;
-  align-items:center;
 }
-.btn{
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-size:13px;
+.pro-center{
+  flex:1;
+  display:flex;
+  justify-content:center;
 }
-.btn.primary{
+.circle-play{
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  border:none;
   background:linear-gradient(135deg,var(--accent),#2563eb);
-  border:0;
-}
-select{
-  background:#111827;
-  color:#fff;
-  border:1px solid #1f2937;
-  border-radius:10px;
-  padding:6px;
-}
-
-.seek-container{
   display:flex;
   align-items:center;
-  gap:6px;
-  flex:1;
-}
-.seek-slider{
-  flex:1;
-  height:6px;
-  border-radius:6px;
-  background:#1f2937;
-  -webkit-appearance:none;
-}
-.seek-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:14px;height:14px;
-  border-radius:50%;
-  background:var(--accent);
-}
-
-.full-btn{
-  width:100%;
-  margin-top:12px;
-  padding:14px;
-  font-size:15px;
-  font-weight:600;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:0;
-  color:#fff;
+  justify-content:center;
   cursor:pointer;
+  box-shadow:0 12px 30px rgba(59,130,246,.45);
+}
+.circle-play:active{transform:scale(.94)}
+.play-icon{
+  width:0;height:0;
+  border-left:20px solid #fff;
+  border-top:12px solid transparent;
+  border-bottom:12px solid transparent;
+  margin-left:4px;
+}
+.small-btn{
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  padding:8px;
+  border-radius:10px;
+  font-size:12px;
+  cursor:pointer;
+  text-align:center;
+}
+.small-btn select{
+  width:100%;
+  background:transparent;
+  border:none;
+  color:#fff;
 }
 
+/* ===== POPUP ===== */
 .popup{
   position:fixed;
   inset:0;
@@ -167,26 +163,35 @@ select{
 
     <video id="player" playsinline></video>
 
-    <div class="controls">
-      <button id="play" class="btn primary">Play</button>
-
-      <div class="seek-container">
-        <input type="range" min="0" value="0" id="seek" class="seek-slider">
-        <span id="time">0:00</span>
+    <!-- PRO PLAYER CONTROLS -->
+    <div class="pro-controls">
+      <div class="pro-side">
+        <button id="rewind5" class="small-btn">⏪ -5s</button>
+        <button id="fs2" class="small-btn">⛶ Full</button>
       </div>
 
-      <button id="mute" class="btn">Mute</button>
-      <select id="speed">
-        <option value="1" selected>1x</option>
-        <option value="1.25">1.25x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
+      <div class="pro-center">
+        <button id="bigPlay" class="circle-play">
+          <div class="play-icon"></div>
+        </button>
+      </div>
 
-      <button id="fullscreen" class="btn">Fullscreen</button>
+      <div class="pro-side">
+        <button id="forward5" class="small-btn">+5s ⏩</button>
+        <div class="small-btn">
+          <select id="speed2">
+            <option value="1">1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <button id="openFull" class="full-btn">FULL KONTEN</button>
+    <button id="openFull" class="small-btn" style="width:100%;margin-top:14px;padding:14px">
+      FULL KONTEN
+    </button>
   </div>
 </div>
 
@@ -196,7 +201,7 @@ select{
 
 <script>
 const id = new URLSearchParams(location.search).get('v');
-let allowPlay = false; // KV FLAG
+let allowPlay = false;
 
 fetch('/videos')
 .then(r=>r.json())
@@ -209,10 +214,9 @@ fetch('/videos')
 
   const player = document.getElementById('player');
   player.src = v.src;
-
   player.onloadeddata=()=>player.classList.add('ready');
 
-  // ===== KV CLICK WINDOWS (IKLAN KE-2) =====
+  // ===== IKLAN KE-2 =====
   player.addEventListener('play',e=>{
     if(!allowPlay){
       e.preventDefault();
@@ -223,38 +227,23 @@ fetch('/videos')
     }
   });
 
-  const playBtn=document.getElementById('play');
-  playBtn.onclick=()=>player.paused?player.play():player.pause();
-
-  document.getElementById('mute').onclick=()=>player.muted=!player.muted;
-  document.getElementById('speed').onchange=e=>player.playbackRate=parseFloat(e.target.value);
-
-  document.getElementById('fullscreen').onclick=()=>{
+  // PRO CONTROLS
+  bigPlay.onclick=()=>player.paused?player.play():player.pause();
+  rewind5.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
+  forward5.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
+  fs2.onclick=()=>{
     if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
     else document.exitFullscreen();
   };
+  speed2.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  const seek=document.getElementById('seek');
-  const time=document.getElementById('time');
-
-  player.onloadedmetadata=()=>seek.max=player.duration;
-  player.ontimeupdate=()=>{
-    seek.value=player.currentTime;
-    time.textContent=
-      Math.floor(player.currentTime/60)+":"+
-      String(Math.floor(player.currentTime%60)).padStart(2,"0");
-  };
-  seek.oninput=()=>player.currentTime=seek.value;
-
-  // ===== POPUP FULL KONTEN =====
-  const popup=document.getElementById('popup');
-  const box=document.getElementById('popupBox');
-  document.getElementById('openFull').onclick=()=>{
-    box.innerHTML='';
+  // POPUP FULL
+  openFull.onclick=()=>{
+    popupBox.innerHTML='';
     (v.downloads||[]).forEach(d=>{
       const a=document.createElement('a');
       a.href=d.url;a.target='_blank';a.textContent=d.label;
-      box.appendChild(a);
+      popupBox.appendChild(a);
     });
     popup.classList.add('show');
   };
@@ -265,7 +254,7 @@ fetch('/videos')
 <!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
-<!-- POPUNDER BIASA (IKLAN KE-1) -->
+<!-- IKLAN KE-1 -->
 <script>
 (function(s){
   s.dataset.zone='10109877';
