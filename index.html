@@ -41,7 +41,6 @@ h1{font-size:18px;margin:6px 0}
   background:#22ff00;
   opacity:.25;
   box-shadow:0 0 6px #22ff00;
-  transition:.3s;
 }
 .dot.on{opacity:1}
 
@@ -50,19 +49,14 @@ video{
   border-radius:14px;
   background:#000;
   margin:12px 0;
-  object-fit:contain;
-  opacity:0;
-  transform:scale(.98);
-  transition:.4s ease;
 }
-video.ready{opacity:1;transform:scale(1)}
 
-/* ===== PRO CONTROLS ===== */
+/* === CONTROLS === */
 .pro-controls{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-top:14px;
+  margin-top:12px;
 }
 .pro-side{
   width:90px;
@@ -70,28 +64,16 @@ video.ready{opacity:1;transform:scale(1)}
   flex-direction:column;
   gap:8px;
 }
-.pro-center{
-  flex:1;
-  display:flex;
-  justify-content:center;
-}
+.pro-center{flex:1;display:flex;justify-content:center}
 
-/* === YT STYLE PLAY === */
 .circle-play{
-  width:68px;
-  height:68px;
-  border-radius:50%;
+  width:68px;height:68px;border-radius:50%;
   border:none;
   background:linear-gradient(135deg,var(--accent),#2563eb);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  position:relative;
-  box-shadow:0 12px 30px rgba(59,130,246,.45);
-  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
 }
-.circle-play.spin{animation:spin .5s}
+.circle-play.spin{animation:spin .4s}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .play-icon{
@@ -102,9 +84,9 @@ video.ready{opacity:1;transform:scale(1)}
   margin-left:4px;
 }
 .pause-icon{
+  position:absolute;
   display:flex;
   gap:6px;
-  position:absolute;
   opacity:0;
 }
 .pause-icon span{
@@ -124,7 +106,6 @@ video.ready{opacity:1;transform:scale(1)}
 }
 .small-btn svg{display:block;margin:auto}
 
-/* popup */
 .popup{
   position:fixed;inset:0;
   background:rgba(0,0,0,.6);
@@ -141,7 +122,7 @@ video.ready{opacity:1;transform:scale(1)}
 .popup-box a{
   display:block;margin-top:10px;
   padding:12px;border-radius:10px;
-  background:#111827;border:1px solid #1f2937;
+  background:#111827;
   color:#fff;text-decoration:none;
 }
 </style>
@@ -154,10 +135,10 @@ video.ready{opacity:1;transform:scale(1)}
     <h1 id="title"></h1>
 
     <div class="stats">
-      <div id="views">0 views</div>
+      <div id="views">–</div>
       <div class="online">
-        <div id="dot" class="dot"></div>
-        <span id="onlineText">0 online</span>
+        <div id="dot" class="dot on"></div>
+        <span>LIVE</span>
       </div>
     </div>
 
@@ -171,11 +152,11 @@ video.ready{opacity:1;transform:scale(1)}
             <polygon points="22,19 13,12 22,5"/>
           </svg>
         </button>
-        <button id="fs2" class="small-btn">⛶</button>
+        <button id="fs" class="small-btn">⛶</button>
       </div>
 
       <div class="pro-center">
-        <button id="bigPlay" class="circle-play">
+        <button id="playBtn" class="circle-play">
           <div class="play-icon"></div>
           <div class="pause-icon"><span></span><span></span></div>
         </button>
@@ -188,7 +169,7 @@ video.ready{opacity:1;transform:scale(1)}
             <polygon points="2,5 11,12 2,19"/>
           </svg>
         </button>
-        <select id="speed2" class="small-btn">
+        <select id="speed" class="small-btn">
           <option value="1">1x</option>
           <option value="1.25">1.25x</option>
           <option value="1.5">1.5x</option>
@@ -197,7 +178,7 @@ video.ready{opacity:1;transform:scale(1)}
       </div>
     </div>
 
-    <button id="openFull" class="small-btn" style="width:100%;margin-top:14px;padding:14px">
+    <button id="openFull" class="small-btn" style="width:100%;margin-top:12px">
       FULL KONTEN
     </button>
   </div>
@@ -207,49 +188,34 @@ video.ready{opacity:1;transform:scale(1)}
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<!-- ================= MAIN SCRIPT ================= -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, onDisconnect, increment, update }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-/* === FIREBASE CONFIG (GANTI PUNYA LU) === */
-const firebaseConfig = {
-  apiKey: "XXXX",
-  authDomain: "XXXX",
-  databaseURL: "XXXX",
-  projectId: "XXXX",
-};
-const appFB = initializeApp(firebaseConfig);
-const db = getDatabase(appFB);
-
-/* === VIDEO LOAD === */
+<script>
 const id = new URLSearchParams(location.search).get('v');
 const player = document.getElementById('player');
 
-fetch('/videos').then(r=>r.json()).then(videos=>{
-  if(!videos[id]) return;
+fetch('videos.json')
+.then(r=>r.json())
+.then(videos=>{
+  if(!id || !videos[id]) return;
+
   const v = videos[id];
   app.classList.remove('hidden');
   title.textContent = v.title;
   player.src = v.src;
-  player.onloadeddata=()=>player.classList.add('ready');
+  views.textContent = "STATIC MODE";
 
-  /* === PLAY UI === */
-  bigPlay.onclick=()=>{
-    bigPlay.classList.add('spin');
-    setTimeout(()=>bigPlay.classList.remove('spin'),500);
-    player.paused?player.play():player.pause();
+  playBtn.onclick = ()=>{
+    playBtn.classList.add('spin');
+    setTimeout(()=>playBtn.classList.remove('spin'),400);
+    player.paused ? player.play() : player.pause();
   };
-  player.onplay=()=>bigPlay.classList.add('playing');
-  player.onpause=()=>bigPlay.classList.remove('playing');
+  player.onplay=()=>playBtn.classList.add('playing');
+  player.onpause=()=>playBtn.classList.remove('playing');
 
   rewind5.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
   forward5.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-  fs2.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
-  speed2.onchange=e=>player.playbackRate=parseFloat(e.target.value);
+  fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
+  speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-  /* === FULL KONTEN === */
   openFull.onclick=()=>{
     popupBox.innerHTML='';
     (v.downloads||[]).forEach(d=>{
@@ -260,24 +226,6 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
     popup.classList.add('show');
   };
   popup.onclick=e=>e.target===popup&&popup.classList.remove('show');
-
-  /* === VIEWS === */
-  const viewsRef = ref(db,'views/'+id);
-  update(viewsRef,{count:increment(1)});
-  onValue(viewsRef,s=>{
-    views.textContent=(s.val()?.count||0)+" views";
-  });
-
-  /* === ONLINE === */
-  const uid = Math.random().toString(36).slice(2);
-  const onlineRef = ref(db,'online/'+id+'/'+uid);
-  set(onlineRef,true);
-  onDisconnect(onlineRef).remove();
-  onValue(ref(db,'online/'+id),s=>{
-    const c=s.exists()?Object.keys(s.val()).length:0;
-    onlineText.textContent=c+" online";
-    dot.classList.toggle('on',c>0);
-  });
 });
 </script>
 
