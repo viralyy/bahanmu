@@ -47,39 +47,28 @@ h1{font-size:18px;margin:6px 0}
   50%{opacity:1}
 }
 
-.video-wrap{
-  position:relative;
-  margin:12px 0;
-}
 video{
   width:100%;
   border-radius:14px;
   background:#000;
+  margin:12px 0;
   object-fit:contain;
 }
 
-/* ===== YT STYLE CONTROLS ===== */
+/* ===== CONTROLS ===== */
 .controls{
   display:grid;
-  grid-template-columns:1fr auto 1fr;
+  grid-template-columns:auto auto auto auto auto;
+  justify-content:center;
   align-items:center;
-  gap:12px;
+  gap:14px;
   margin-top:14px;
 }
-.ctrl-left,
-.ctrl-right{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.ctrl-left{justify-content:flex-end}
-.ctrl-right{justify-content:flex-start}
-
 .btn{
-  background:#111827;
-  border:1px solid #1f2937;
   width:44px;
   height:44px;
+  background:#111827;
+  border:1px solid #1f2937;
   border-radius:12px;
   display:flex;
   align-items:center;
@@ -88,30 +77,27 @@ video{
 }
 .btn svg{width:20px;height:20px;fill:#fff}
 
-.play-big{
+.play-btn{
   width:72px;
   height:72px;
   border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#2563eb);
   border:none;
+  background:linear-gradient(135deg,var(--accent),#2563eb);
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 14px 34px rgba(59,130,246,.45);
   cursor:pointer;
+  box-shadow:0 14px 34px rgba(59,130,246,.45);
+  transition:.25s;
 }
-.play-big svg{
-  width:28px;height:28px;fill:#fff;
-}
-.play-big.pause svg{
-  width:26px;height:26px;
-}
+.play-btn:active{transform:scale(.9) rotate(6deg)}
+.play-btn svg{width:28px;height:28px;fill:#fff}
 
 select{
   background:#111827;
   border:1px solid #1f2937;
   color:#fff;
-  padding:8px 10px;
+  padding:8px;
   border-radius:10px;
 }
 
@@ -143,6 +129,11 @@ select{
   background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
+  transform:translateY(40px);
+  animation:slideUp .35s ease forwards;
+}
+@keyframes slideUp{
+  to{transform:translateY(0)}
 }
 .popup-box a{
   display:block;
@@ -153,6 +144,24 @@ select{
   border:1px solid #1f2937;
   color:#fff;
   text-decoration:none;
+}
+
+/* notif */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:-40px;
+  transform:translateX(-50%);
+  background:#111827;
+  border:1px solid #1f2937;
+  padding:10px 16px;
+  border-radius:12px;
+  opacity:0;
+  transition:.4s;
+}
+.toast.show{
+  bottom:30px;
+  opacity:1;
 }
 </style>
 </head>
@@ -171,40 +180,37 @@ select{
       </div>
     </div>
 
-    <div class="video-wrap">
-      <video id="player" playsinline></video>
-    </div>
+    <video id="player" playsinline></video>
 
     <!-- CONTROLS -->
     <div class="controls">
-      <div class="ctrl-left">
-        <div id="rewind" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6L11 18zm1-12v12l8.5-6L12 6z"/></svg>
-        </div>
+      <!-- fullscreen -->
+      <div id="fs" class="btn">
+        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
       </div>
 
-      <button id="playBtn" class="play-big">
-        <svg id="playIcon" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
+      <!-- rewind -->
+      <div id="rewind" class="btn">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12 11 18z"/></svg>
+      </div>
+
+      <!-- play -->
+      <button id="playBtn" class="play-btn">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
       </button>
 
-      <div class="ctrl-right">
-        <div id="forward" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zM11 18V6L2.5 12 11 18z"/></svg>
-        </div>
-
-        <select id="speed">
-          <option value="1">1x</option>
-          <option value="1.25">1.25x</option>
-          <option value="1.5">1.5x</option>
-          <option value="2">2x</option>
-        </select>
-
-        <div id="fs" class="btn">
-          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
-        </div>
+      <!-- forward -->
+      <div id="forward" class="btn">
+        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6z"/></svg>
       </div>
+
+      <!-- speed -->
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
     </div>
 
     <button id="openFull">FULL KONTEN</button>
@@ -215,22 +221,23 @@ select{
   <div class="popup-box" id="popupBox"></div>
 </div>
 
+<div id="toast" class="toast">CIHUY🗿</div>
+
 <script>
 const id = new URLSearchParams(location.search).get('v');
 let allowPlay = false;
-const FIREBASE = 'https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 fetch('/videos')
 .then(r=>r.json())
 .then(videos=>{
-  if(!id || !videos[id]) return;
-  const v = videos[id];
+  if(!id||!videos[id])return;
+  const v=videos[id];
   app.classList.remove('hidden');
-  title.textContent = v.title;
+  title.textContent=v.title;
+  player.src=v.src;
 
-  player.src = v.src;
-
-  // iklan logic lu
+  // iklan logic LU (TETAP)
   player.addEventListener('play',e=>{
     if(!allowPlay){
       e.preventDefault();
@@ -244,11 +251,9 @@ fetch('/videos')
   playBtn.onclick=()=>{
     if(player.paused){
       player.play();
-      playBtn.classList.add('pause');
       playIcon.innerHTML='<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
     }else{
       player.pause();
-      playBtn.classList.remove('pause');
       playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
     }
   };
@@ -266,25 +271,26 @@ fetch('/videos')
       popupBox.appendChild(a);
     });
     popup.classList.add('show');
+
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),2000);
   };
-  popup.onclick=e=>{if(e.target===popup) popup.classList.remove('show')};
+  popup.onclick=e=>{if(e.target===popup)popup.classList.remove('show')};
 });
 
-/* ===== VIEWS + ONLINE ===== */
+/* ===== VIEWS ===== */
+fetch(`${FIREBASE}/views/${id}.json`)
+.then(r=>r.json())
+.then(n=>{
+  n=(n||0)+1;
+  fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:n});
+  views.textContent=n+' views';
+});
+
+/* ===== ONLINE ===== */
 const uid=Math.random().toString(36).slice(2);
-fetch(`${FIREBASE}/views/${id}.json`,{method:'POST'});
-
-setInterval(()=>{
-  fetch(`${FIREBASE}/views/${id}.json`)
-  .then(r=>r.json())
-  .then(d=>views.textContent=(d?Object.keys(d).length:0)+' views');
-},3000);
-
 function heartbeat(){
-  fetch(`${FIREBASE}/online/${id}/${uid}.json`,{
-    method:'PUT',
-    body:Date.now()
-  });
+  fetch(`${FIREBASE}/online/${id}/${uid}.json`,{method:'PUT',body:Date.now()});
 }
 heartbeat();
 setInterval(heartbeat,4000);
@@ -299,6 +305,16 @@ setInterval(()=>{
     dot.classList.toggle('on',c>0);
   });
 },3000);
+</script>
+
+<!-- IKLAN KE-1 JANGAN DIHAPUS -->
+<script>
+(function(s){
+  s.dataset.zone='10109877';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement, document.body].filter(Boolean)
+  .pop()
+  .appendChild(document.createElement('script')));
 </script>
 
 </body>
