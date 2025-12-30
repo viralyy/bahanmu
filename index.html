@@ -57,6 +57,7 @@ video{
   justify-content:center;
   align-items:center;
   gap:14px;
+  flex-wrap:wrap;
   margin-top:14px;
 }
 .ctrl{
@@ -104,9 +105,10 @@ select{
   color:#fff;
   font-weight:600;
   cursor:pointer;
+  font-size:16px;
 }
 
-/* POPUP FIX CLICKABLE */
+/* POPUP FIX CLICKABLE & MOBILE FRIENDLY */
 .popup{
   position:fixed;
   inset:0;
@@ -125,14 +127,16 @@ select{
 }
 .popup-box{
   position:relative;
-  width:90%;
+  width:95%;
   max-width:500px;
+  max-height:70vh;
   background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
   transform:translateY(100%);
   animation:slideUp .4s forwards;
   z-index:1;
+  overflow-y:auto;
 }
 @keyframes slideUp{to{transform:translateY(0)}}
 .popup-box a{
@@ -145,6 +149,7 @@ select{
   color:#fff;
   text-decoration:none;
   pointer-events:auto;
+  font-size:16px;
 }
 
 /* CIHUY */
@@ -161,6 +166,16 @@ select{
   0%{bottom:-50px;opacity:0}
   30%{bottom:50%;opacity:1}
   100%{bottom:120%;opacity:0}
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media(max-width:480px){
+  .controls{
+    gap:10px;
+  }
+  .ctrl{width:40px;height:40px}
+  .play-btn{width:60px;height:60px}
+  select{height:36px;font-size:14px}
 }
 </style>
 </head>
