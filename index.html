@@ -243,10 +243,9 @@ select{
 
 <video id="player" playsinline></video>
 <div class="progress-container" id="progressContainer">
-  <div id="progress" class="progress-bar">
-    <div id="handle" class="progress-handle"></div>
-    <div id="tooltip" class="progress-tooltip">0:00</div>
-  </div>
+  <div id="progress" class="progress-bar"></div>
+  <div id="handle" class="progress-handle"></div>
+  <div id="tooltip" class="progress-tooltip">0:00</div>
 </div>
 
 <div class="controls">
@@ -303,7 +302,7 @@ player.addEventListener('play', e => {
   }
 });
 
-/* PROGRESS BAR UPDATE & SCRUB */
+/* PROGRESS BAR */
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progress');
 const handle = document.getElementById('handle');
@@ -315,40 +314,41 @@ const formatTime = s=>{
   return m+':'+(sec<10?'0':'')+sec;
 };
 
-const updateProgress = () => {
-  const pct = (player.currentTime/player.duration)*100;
-  progressBar.style.width=pct+'%';
-  handle.style.left=pct+'%';
-  tooltip.textContent=formatTime(player.currentTime);
-};
+function updateUI(){
+  const pct = (player.currentTime / player.duration) * 100 || 0;
+  progressBar.style.width = pct + '%';
+  handle.style.left = pct + '%';
+  tooltip.style.left = pct + '%';
+  tooltip.textContent = formatTime(player.currentTime);
+}
 
-player.addEventListener('timeupdate', updateProgress);
+player.addEventListener('timeupdate', updateUI);
 
-/* SCRUB */
+/* DRAG HANDLE */
 let isDragging=false;
 
-const seek = e=>{
-  const rect = progressContainer.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const pct = Math.max(0,Math.min(1,x/rect.width));
-  player.currentTime = pct * player.duration;
-};
-
-progressContainer.addEventListener('mousedown', e=>{
+handle.addEventListener('mousedown', e=>{
   isDragging=true;
-  seek(e);
+  e.preventDefault();
 });
-progressContainer.addEventListener('mousemove', e=>{
-  if(isDragging) seek(e);
+document.addEventListener('mousemove', e=>{
+  if(!isDragging) return;
+  const rect = progressContainer.getBoundingClientRect();
+  let pct = (e.clientX - rect.left)/rect.width;
+  pct = Math.max(0, Math.min(1, pct));
+  player.currentTime = pct * player.duration;
+  updateUI();
 });
-document.addEventListener('mouseup', ()=>{ isDragging=false; });
+document.addEventListener('mouseup', e=>{ isDragging=false; });
 
+/* TOOLTIP HOVER */
 progressContainer.addEventListener('mousemove', e=>{
   const rect = progressContainer.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const pct = Math.max(0,Math.min(1,x/rect.width));
-  tooltip.style.left = (pct*100)+'%';
+  let pct = (e.clientX - rect.left)/rect.width;
+  pct = Math.max(0, Math.min(1, pct));
   tooltip.style.display='block';
+  tooltip.style.left = (pct*100)+'%';
+  tooltip.textContent = formatTime(pct*player.duration);
 });
 progressContainer.addEventListener('mouseleave', ()=>{
   tooltip.style.display='none';
