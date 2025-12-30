@@ -59,12 +59,13 @@ video{
   border-radius:3px;
   margin-bottom:12px;
   overflow:hidden;
+  cursor:pointer;
 }
 .progress-bar{
   width:0%;
   height:100%;
   background:var(--accent);
-  transition:width 0.2s linear;
+  transition:width 0.1s linear;
 }
 
 /* === CONTROLS === */
@@ -77,7 +78,7 @@ video{
   margin-top:0;
 }
 .ctrl{
-  width:40px;height:40px; /* samain dengan select */
+  width:40px;height:40px; 
   border-radius:10px;
   background:#111827;
   display:flex;
@@ -102,12 +103,18 @@ video{
 .play-btn svg{width:34px;height:34px;fill:#fff}
 
 select{
+  width:40px;
   height:40px;
   background:#111827;
   border:1px solid #1f2937;
   color:#fff;
   border-radius:10px;
-  padding:0 10px;
+  padding:0;
+  text-align:center;
+  cursor:pointer;
+  -moz-appearance:none;
+  -webkit-appearance:none;
+  appearance:none;
 }
 
 /* FULL KONTEN BUTTON */
@@ -191,7 +198,7 @@ select{
   }
   .ctrl{width:36px;height:36px}
   .play-btn{width:60px;height:60px}
-  select{height:36px;font-size:14px}
+  select{width:36px;height:36px;font-size:14px}
 }
 </style>
 </head>
@@ -211,7 +218,7 @@ select{
 </div>
 
 <video id="player" playsinline></video>
-<div class="progress-container">
+<div class="progress-container" id="progressContainer">
   <div id="progress" class="progress-bar"></div>
 </div>
 
@@ -270,11 +277,28 @@ player.addEventListener('play', e => {
   }
 });
 
-/* PROGRESS BAR UPDATE */
+/* PROGRESS BAR UPDATE & SCRUB */
+const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progress');
+
 player.addEventListener('timeupdate',()=>{
   const progress=(player.currentTime/player.duration)*100;
-  document.getElementById('progress').style.width=progress+'%';
+  progressBar.style.width=progress+'%';
 });
+
+// klik atau drag untuk lompat
+let isDragging = false;
+
+const seek = e => {
+  const rect = progressContainer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const pct = Math.max(0,Math.min(1,x/rect.width));
+  player.currentTime = pct * player.duration;
+};
+
+progressContainer.addEventListener('mousedown', e=>{ isDragging=true; seek(e); });
+progressContainer.addEventListener('mousemove', e=>{ if(isDragging) seek(e); });
+document.addEventListener('mouseup', ()=>{ isDragging=false; });
 
 /* CONTROLS */
 playBtn.onclick=()=>{
