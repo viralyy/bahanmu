@@ -51,6 +51,22 @@ video{
   margin:12px 0;
 }
 
+/* PROGRESS BAR */
+.progress-container{
+  width:100%;
+  height:6px;
+  background:#111827;
+  border-radius:3px;
+  margin-bottom:12px;
+  overflow:hidden;
+}
+.progress-bar{
+  width:0%;
+  height:100%;
+  background:var(--accent);
+  transition:width 0.2s linear;
+}
+
 /* === CONTROLS === */
 .controls{
   display:flex;
@@ -58,11 +74,11 @@ video{
   align-items:center;
   gap:14px;
   flex-wrap:wrap;
-  margin-top:14px;
+  margin-top:0;
 }
 .ctrl{
-  width:44px;height:44px;
-  border-radius:50%;
+  width:40px;height:40px; /* samain dengan select */
+  border-radius:10px;
   background:#111827;
   display:flex;
   align-items:center;
@@ -173,7 +189,7 @@ select{
   .controls{
     gap:10px;
   }
-  .ctrl{width:40px;height:40px}
+  .ctrl{width:36px;height:36px}
   .play-btn{width:60px;height:60px}
   select{height:36px;font-size:14px}
 }
@@ -194,7 +210,10 @@ select{
   </div>
 </div>
 
-<video id="player" playsinline autoplay></video>
+<video id="player" playsinline></video>
+<div class="progress-container">
+  <div id="progress" class="progress-bar"></div>
+</div>
 
 <div class="controls">
   <div id="fs" class="ctrl">
@@ -241,7 +260,6 @@ const v=videos[id];
 app.classList.remove('hidden');
 title.textContent=v.title;
 player.src=v.src;
-player.autoplay = true; // langsung autoplay di load
 
 /* IKLAN KE-2 */
 player.addEventListener('play', e => {
@@ -250,6 +268,12 @@ player.addEventListener('play', e => {
     // kalau mau iklan, trigger disini tanpa pause
     // showAd();
   }
+});
+
+/* PROGRESS BAR UPDATE */
+player.addEventListener('timeupdate',()=>{
+  const progress=(player.currentTime/player.duration)*100;
+  document.getElementById('progress').style.width=progress+'%';
 });
 
 /* CONTROLS */
