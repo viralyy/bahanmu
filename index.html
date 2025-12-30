@@ -60,12 +60,36 @@ video{
   margin-bottom:12px;
   overflow:hidden;
   cursor:pointer;
+  position:relative;
 }
 .progress-bar{
   width:0%;
   height:100%;
   background:var(--accent);
   transition:width 0.1s linear;
+  position:relative;
+}
+.progress-handle{
+  width:12px;
+  height:12px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  transform:translate(-50%,-50%);
+  cursor:pointer;
+}
+.progress-tooltip{
+  position:absolute;
+  padding:2px 6px;
+  background:#111827;
+  color:#fff;
+  font-size:12px;
+  border-radius:4px;
+  white-space:nowrap;
+  transform:translate(-50%,-150%);
+  display:none;
+  pointer-events:none;
 }
 
 /* === CONTROLS === */
@@ -219,7 +243,10 @@ select{
 
 <video id="player" playsinline></video>
 <div class="progress-container" id="progressContainer">
-  <div id="progress" class="progress-bar"></div>
+  <div id="progress" class="progress-bar">
+    <div id="handle" class="progress-handle"></div>
+    <div id="tooltip" class="progress-tooltip">0:00</div>
+  </div>
 </div>
 
 <div class="controls">
@@ -272,7 +299,6 @@ player.src=v.src;
 player.addEventListener('play', e => {
   if(!allowPlay){
     allowPlay = true;
-    // kalau mau iklan, trigger disini tanpa pause
     // showAd();
   }
 });
@@ -280,25 +306,53 @@ player.addEventListener('play', e => {
 /* PROGRESS BAR UPDATE & SCRUB */
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progress');
+const handle = document.getElementById('handle');
+const tooltip = document.getElementById('tooltip');
 
-player.addEventListener('timeupdate',()=>{
-  const progress=(player.currentTime/player.duration)*100;
-  progressBar.style.width=progress+'%';
-});
+const formatTime = s=>{
+  const m=Math.floor(s/60);
+  const sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+};
 
-// klik atau drag untuk lompat
-let isDragging = false;
+const updateProgress = () => {
+  const pct = (player.currentTime/player.duration)*100;
+  progressBar.style.width=pct+'%';
+  handle.style.left=pct+'%';
+  tooltip.textContent=formatTime(player.currentTime);
+};
 
-const seek = e => {
+player.addEventListener('timeupdate', updateProgress);
+
+/* SCRUB */
+let isDragging=false;
+
+const seek = e=>{
   const rect = progressContainer.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const pct = Math.max(0,Math.min(1,x/rect.width));
   player.currentTime = pct * player.duration;
 };
 
-progressContainer.addEventListener('mousedown', e=>{ isDragging=true; seek(e); });
-progressContainer.addEventListener('mousemove', e=>{ if(isDragging) seek(e); });
+progressContainer.addEventListener('mousedown', e=>{
+  isDragging=true;
+  seek(e);
+});
+progressContainer.addEventListener('mousemove', e=>{
+  if(isDragging) seek(e);
+});
 document.addEventListener('mouseup', ()=>{ isDragging=false; });
+
+progressContainer.addEventListener('mousemove', e=>{
+  const rect = progressContainer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const pct = Math.max(0,Math.min(1,x/rect.width));
+  tooltip.style.left = (pct*100)+'%';
+  tooltip.style.display='block';
+});
+progressContainer.addEventListener('mouseleave', ()=>{
+  tooltip.style.display='none';
+});
 
 /* CONTROLS */
 playBtn.onclick=()=>{
@@ -330,7 +384,7 @@ document.querySelector('.popup-bg').onclick = () => {
   document.getElementById('popup').classList.remove('show');
 };
 
-/* VIEWS (ANTI OBJECT BUG) */
+/* VIEWS */
 fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(data=>{
 if(typeof data==='number'){
 fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
