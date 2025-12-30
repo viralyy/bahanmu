@@ -31,6 +31,9 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 <input id="titleInput" placeholder="Judul video">
 <input id="stream" placeholder="Link stream video">
 
+<!-- TAMBAHAN: Input ID Manual -->
+<input id="manualID" placeholder="Masukkan ID (boleh teks/angka)">
+
 <div class="small">Tombol Download</div>
 <div id="downloads"></div>
 <button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol</button>
@@ -84,8 +87,14 @@ function generate(){
 
   if(!downloads.length) downloads.push({label:'Download', url:src});
 
-  // ===== AUTO ID =====
-  const id = 'vid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  // ===== MANUAL ID =====
+  let id = $('manualID').value.trim();
+  if(!id) id = 'vid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+  // ===== VALIDASI ID UNIK =====
+  const h = JSON.parse(localStorage.getItem('history')||'[]');
+  const idExists = h.some(o => Object.keys(o)[0] === id);
+  if(idExists && editIndex === null) return alert('ID sudah digunakan, gunakan ID lain!');
 
   const data = { [id]: { title, src, downloads } };
 
@@ -102,7 +111,6 @@ function generate(){
   });
 
   // ===== HISTORY =====
-  let h = JSON.parse(localStorage.getItem('history')||'[]');
   editIndex !== null ? (h[editIndex] = data) : (h.unshift(data));
   editIndex = null;
   localStorage.setItem('history', JSON.stringify(h.slice(0,10)));
@@ -146,6 +154,7 @@ function editHistory(i){
   const k = Object.keys(o)[0], v=o[k];
   $('titleInput').value = v.title;
   $('stream').value = v.src;
+  $('manualID').value = k; // restore ID saat edit
   $('downloads').innerHTML = '';
   v.downloads.forEach(d=>addDownload(d.label,d.url));
   renderPreview(v);
