@@ -194,7 +194,7 @@ select{
   </div>
 </div>
 
-<video id="player" playsinline></video>
+<video id="player" playsinline autoplay></video>
 
 <div class="controls">
   <div id="fs" class="ctrl">
@@ -241,16 +241,16 @@ const v=videos[id];
 app.classList.remove('hidden');
 title.textContent=v.title;
 player.src=v.src;
+player.autoplay = true; // langsung autoplay di load
 
 /* IKLAN KE-2 */
-player.addEventListener('play',e=>{
-if(!allowPlay){
-e.preventDefault();
-player.pause();
-allowPlay=true;
-document.body.click();
-setTimeout(()=>player.play(),300);
-}});
+player.addEventListener('play', e => {
+  if(!allowPlay){
+    allowPlay = true;
+    // kalau mau iklan, trigger disini tanpa pause
+    // showAd();
+  }
+});
 
 /* CONTROLS */
 playBtn.onclick=()=>{
