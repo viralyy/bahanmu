@@ -510,5 +510,15 @@
         "url": "https://t.me/temanmalammm"
       }
     ]
+  },
+  "contoh": {
+    "title": "test",
+    "src": "https://cdn.slicedrive.com/ewWlXztN1.mp4",
+    "downloads": [
+      {
+        "label": "Download",
+        "url": "https://cdn.slicedrive.com/ewWlXztN1.mp4"
+      }
+    ]
   }
 }
