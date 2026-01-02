@@ -7,7 +7,7 @@
 
 <style>
 :root{
-  --bg:#020617;
+  --bg:#000;
   --panel:#0b1020;
   --accent:#3b82f6;
   --text:#e5e7eb;
@@ -27,7 +27,6 @@ body{
   justify-content:space-between;
   align-items:center;
   padding:12px 14px;
-  background:#000;
 }
 .header h1{
   font-size:18px;
@@ -43,16 +42,17 @@ body{
   text-decoration:none;
 }
 
-/* ===== CONTENT ===== */
+/* ===== WRAP ===== */
 .wrap{max-width:720px;margin:auto}
 .card{padding:12px}
 
+/* ===== STATS ===== */
 .stats{
   display:flex;
   justify-content:space-between;
-  margin-top:6px;
   font-size:12px;
   color:var(--muted);
+  margin-top:6px;
 }
 .online{display:flex;align-items:center;gap:6px}
 .dot{
@@ -71,24 +71,30 @@ body{
   aspect-ratio:16/9;
   background:#000;
   margin:14px 0;
+  border-radius:14px;
+  overflow:hidden;
 }
 .player-wrap video{
   width:100%;
   height:100%;
+  background:#000;
 }
 
-/* ===== SHARE BUTTONS ===== */
+/* ===== ACTION BUTTONS ===== */
 .actions{
   display:flex;
   gap:10px;
+  margin-top:10px;
 }
 .action{
   flex:1;
   padding:12px;
-  text-align:center;
   background:#111827;
   border-radius:12px;
+  border:none;
+  color:#fff;
   font-size:14px;
+  cursor:pointer;
 }
 
 /* ===== FULL KONTEN ===== */
@@ -102,11 +108,59 @@ body{
   font-size:16px;
   font-weight:700;
   color:#fff;
+  cursor:pointer;
+}
+
+/* ===== EXTRA BUTTON ===== */
+.bottom-actions{
+  margin-top:10px;
+}
+.bottom-actions .action{
+  width:100%;
+}
+
+/* ===== POPUP ===== */
+.popup{
+  position:fixed;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:flex-end;
+  z-index:999;
+}
+.popup.show{display:flex}
+.popup-bg{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.65);
+}
+.popup-box{
+  position:relative;
+  width:95%;
+  max-width:500px;
+  max-height:70vh;
+  background:#0b1020;
+  border-radius:18px 18px 0 0;
+  padding:16px;
+  transform:translateY(100%);
+  animation:slideUp .4s forwards;
+  overflow-y:auto;
+}
+@keyframes slideUp{to{transform:translateY(0)}}
+.popup-box a{
+  display:block;
+  margin-top:12px;
+  padding:14px;
+  border-radius:12px;
+  background:#111827;
+  color:#fff;
+  text-decoration:none;
+  font-weight:600;
 }
 
 /* ===== FOOTER ===== */
 footer{
-  margin-top:30px;
+  margin-top:28px;
   padding:16px;
   text-align:center;
   font-size:12px;
@@ -141,17 +195,28 @@ footer{
   <video id="player" playsinline></video>
 </div>
 
-<!-- SHARE -->
+<!-- SHARE / COPY / DOWNLOAD (ID AMAN) -->
 <div class="actions">
-  <div class="action">Share</div>
-  <div class="action">Copy</div>
-  <div class="action">Download</div>
+  <button id="shareBtn" class="action">Share</button>
+  <button id="copyBtn" class="action">Copy</button>
+  <button id="downloadBtn" class="action">Download</button>
 </div>
 
 <!-- FULL KONTEN -->
 <button id="openFull" class="full-btn">FULL KONTEN</button>
 
+<!-- TOMBOL BAWAH (MASIH ADA) -->
+<div class="actions bottom-actions">
+  <button id="extraBtn" class="action">Lanjut</button>
 </div>
+
+</div>
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup">
+  <div class="popup-bg"></div>
+  <div class="popup-box" id="popupBox"></div>
 </div>
 
 <footer>
