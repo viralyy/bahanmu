@@ -3,76 +3,76 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stream</title>
+<title>Videy</title>
 
 <style>
-:root{
-  --bg:#000;
-  --panel:#0b1020;
-  --accent:#3b82f6;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-}
 *{box-sizing:border-box}
 body{
   margin:0;
   background:#000;
-  color:var(--text);
+  color:#fff;
   font-family:system-ui,Segoe UI,Inter,Arial;
 }
 
 /* ===== HEADER ===== */
 .header{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   padding:12px 14px;
 }
 .header h1{
-  font-size:18px;
+  font-size:17px;
+  font-weight:600;
   margin:0;
-  font-weight:700;
 }
 .header a{
-  padding:7px 14px;
-  background:#111827;
-  border-radius:10px;
+  padding:6px 14px;
+  border-radius:20px;
+  background:#111;
   font-size:13px;
   color:#fff;
   text-decoration:none;
 }
 
-/* ===== WRAP ===== */
-.wrap{max-width:720px;margin:auto}
-.card{padding:12px}
+/* ===== CONTENT ===== */
+.wrap{
+  max-width:720px;
+  margin:auto;
+}
+.card{
+  padding:12px;
+}
 
 /* ===== STATS ===== */
 .stats{
   display:flex;
   justify-content:space-between;
   font-size:12px;
-  color:var(--muted);
-  margin-top:6px;
+  color:#aaa;
+  margin:6px 0 10px;
 }
-.online{display:flex;align-items:center;gap:6px}
+.online{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 .dot{
-  width:8px;height:8px;
+  width:7px;
+  height:7px;
   border-radius:50%;
-  background:#22ff00;
+  background:#0f0;
   opacity:.3;
 }
 .dot.on{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:1}}
 
-/* ===== PLAYER 16:9 ===== */
+/* ===== PLAYER ===== */
 .player-wrap{
   position:relative;
   width:100%;
   aspect-ratio:16/9;
   background:#000;
-  margin:14px 0;
-  border-radius:14px;
-  overflow:hidden;
 }
 .player-wrap video{
   width:100%;
@@ -84,17 +84,16 @@ body{
 .actions{
   display:flex;
   gap:10px;
-  margin-top:10px;
+  margin-top:12px;
 }
 .action{
   flex:1;
-  padding:12px;
-  background:#111827;
-  border-radius:12px;
+  padding:12px 0;
+  border-radius:14px;
+  background:#111;
   border:none;
   color:#fff;
   font-size:14px;
-  cursor:pointer;
 }
 
 /* ===== FULL KONTEN ===== */
@@ -102,16 +101,15 @@ body{
   width:100%;
   margin-top:12px;
   padding:14px;
-  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  border-radius:16px;
+  background:#1a1a1a;
   border:none;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:700;
+  font-size:15px;
+  font-weight:600;
   color:#fff;
-  cursor:pointer;
 }
 
-/* ===== EXTRA BUTTON ===== */
+/* ===== EXTRA ===== */
 .bottom-actions{
   margin-top:10px;
 }
@@ -132,40 +130,37 @@ body{
 .popup-bg{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,.65);
+  background:rgba(0,0,0,.7);
 }
 .popup-box{
   position:relative;
-  width:95%;
+  width:100%;
   max-width:500px;
-  max-height:70vh;
-  background:#0b1020;
+  background:#000;
   border-radius:18px 18px 0 0;
-  padding:16px;
-  transform:translateY(100%);
-  animation:slideUp .4s forwards;
-  overflow-y:auto;
+  padding:14px;
+  max-height:70vh;
+  overflow:auto;
 }
-@keyframes slideUp{to{transform:translateY(0)}}
 .popup-box a{
   display:block;
-  margin-top:12px;
   padding:14px;
-  border-radius:12px;
-  background:#111827;
+  border-radius:14px;
+  background:#111;
+  margin-bottom:10px;
   color:#fff;
   text-decoration:none;
-  font-weight:600;
+  font-size:15px;
 }
 
 /* ===== FOOTER ===== */
 footer{
-  margin-top:28px;
-  padding:16px;
   text-align:center;
   font-size:12px;
-  color:#6b7280;
-  border-top:1px solid #111827;
+  color:#666;
+  padding:18px 10px;
+  border-top:1px solid #111;
+  margin-top:20px;
 }
 </style>
 </head>
@@ -195,7 +190,7 @@ footer{
   <video id="player" playsinline></video>
 </div>
 
-<!-- SHARE / COPY / DOWNLOAD (ID AMAN) -->
+<!-- SHARE / COPY / DOWNLOAD -->
 <div class="actions">
   <button id="shareBtn" class="action">Share</button>
   <button id="copyBtn" class="action">Copy</button>
@@ -205,7 +200,7 @@ footer{
 <!-- FULL KONTEN -->
 <button id="openFull" class="full-btn">FULL KONTEN</button>
 
-<!-- TOMBOL BAWAH (MASIH ADA) -->
+<!-- TOMBOL BAWAH -->
 <div class="actions bottom-actions">
   <button id="extraBtn" class="action">Lanjut</button>
 </div>
@@ -220,16 +215,16 @@ footer{
 </div>
 
 <footer>
-  © 2026 Videy • All Rights Reserved
+  © 2026 Videy
 </footer>
 
-<!-- ⚠️ SCRIPT ASLI LO, GA DIUBAH SAMA SEKALI -->
+<!-- ⚠️ SCRIPT ASLI LO — TIDAK DIUBAH -->
 <script>
 /* === SCRIPT LO TETAP SAMA === */
 </script>
 
 <iframe src="histats.html" style="display:none"></iframe>
-<script data-cfasync="false" async type="text/javascript" src="//sl.moutonstumeric.com/rr9DV67NkrHeRj/131146"></script>
+<script data-cfasync="false" async src="//sl.moutonstumeric.com/rr9DV67NkrHeRj/131146"></script>
 
 </body>
 </html>
