@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Videy</title>
+<title>videy</title>
 
 <style>
 *{box-sizing:border-box}
@@ -17,8 +17,8 @@ body{
 /* ===== HEADER ===== */
 .header{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   padding:12px 14px;
 }
 .header h1{
@@ -28,26 +28,22 @@ body{
 }
 .header a{
   padding:6px 14px;
-  border-radius:20px;
   background:#111;
+  border-radius:20px;
   font-size:13px;
   color:#fff;
   text-decoration:none;
 }
 
-/* ===== CONTENT ===== */
-.wrap{
-  max-width:720px;
-  margin:auto;
-}
-.card{
-  padding:12px;
-}
+/* ===== CONTAINER ===== */
+.wrap{max-width:720px;margin:auto}
+.card{padding:12px}
 
-/* ===== STATS ===== */
+/* ===== STATS (ASLI) ===== */
 .stats{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   font-size:12px;
   color:#aaa;
   margin:6px 0 10px;
@@ -58,16 +54,15 @@ body{
   gap:6px;
 }
 .dot{
-  width:7px;
-  height:7px;
+  width:7px;height:7px;
   border-radius:50%;
-  background:#0f0;
+  background:#22ff00;
   opacity:.3;
 }
 .dot.on{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:1}}
 
-/* ===== PLAYER ===== */
+/* ===== PLAYER 16:9 ===== */
 .player-wrap{
   position:relative;
   width:100%;
@@ -80,19 +75,71 @@ body{
   background:#000;
 }
 
-/* ===== ACTION BUTTONS ===== */
+/* ===== PROGRESS (ASLI) ===== */
+.progress-container{
+  width:100%;
+  height:6px;
+  background:#111;
+  border-radius:6px;
+  margin:10px 0;
+  position:relative;
+}
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#555;
+}
+.progress-handle{
+  position:absolute;
+  top:50%;
+  width:12px;
+  height:12px;
+  background:#fff;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+.progress-tooltip{display:none}
+
+/* ===== CONTROLS (ASLI) ===== */
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin:10px 0;
+}
+.ctrl,
+.play-btn,
+select{
+  background:#111;
+  border:none;
+  color:#fff;
+}
+.ctrl{
+  width:38px;height:38px;
+  border-radius:10px;
+}
+.play-btn{
+  width:60px;height:60px;
+  border-radius:50%;
+}
+select{
+  width:44px;
+  height:38px;
+  border-radius:10px;
+}
+
+/* ===== SHARE / COPY / DOWNLOAD (ASLI, CUMA POSISI) ===== */
 .actions{
   display:flex;
   gap:10px;
   margin-top:12px;
 }
-.action{
+.actions > *{
   flex:1;
   padding:12px 0;
-  border-radius:14px;
   background:#111;
-  border:none;
-  color:#fff;
+  border-radius:14px;
+  text-align:center;
   font-size:14px;
 }
 
@@ -101,23 +148,15 @@ body{
   width:100%;
   margin-top:12px;
   padding:14px;
-  border-radius:16px;
-  background:#1a1a1a;
+  background:#111;
   border:none;
+  border-radius:16px;
   font-size:15px;
   font-weight:600;
   color:#fff;
 }
 
-/* ===== EXTRA ===== */
-.bottom-actions{
-  margin-top:10px;
-}
-.bottom-actions .action{
-  width:100%;
-}
-
-/* ===== POPUP ===== */
+/* ===== POPUP (ASLI) ===== */
 .popup{
   position:fixed;
   inset:0;
@@ -139,18 +178,6 @@ body{
   background:#000;
   border-radius:18px 18px 0 0;
   padding:14px;
-  max-height:70vh;
-  overflow:auto;
-}
-.popup-box a{
-  display:block;
-  padding:14px;
-  border-radius:14px;
-  background:#111;
-  margin-bottom:10px;
-  color:#fff;
-  text-decoration:none;
-  font-size:15px;
 }
 
 /* ===== FOOTER ===== */
@@ -158,7 +185,7 @@ footer{
   text-align:center;
   font-size:12px;
   color:#666;
-  padding:18px 10px;
+  padding:18px 0;
   border-top:1px solid #111;
   margin-top:20px;
 }
@@ -167,16 +194,14 @@ footer{
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <h1 id="title">Judul Video</h1>
+  <h1 id="title"></h1>
   <a href="https://wa.me/628xxxxxxxxx" target="_blank">Saluran WA</a>
 </div>
 
 <div class="wrap">
 <div id="app" class="card">
 
-<!-- STATS -->
 <div class="stats">
   <div id="views">0 views</div>
   <div class="online">
@@ -185,40 +210,48 @@ footer{
   </div>
 </div>
 
-<!-- PLAYER -->
 <div class="player-wrap">
   <video id="player" playsinline></video>
 </div>
 
-<!-- SHARE / COPY / DOWNLOAD -->
-<div class="actions">
-  <button id="shareBtn" class="action">Share</button>
-  <button id="copyBtn" class="action">Copy</button>
-  <button id="downloadBtn" class="action">Download</button>
+<div class="progress-container" id="progressContainer">
+  <div id="progress" class="progress-bar"></div>
+  <div id="handle" class="progress-handle"></div>
+  <div id="tooltip" class="progress-tooltip">0:00</div>
 </div>
 
-<!-- FULL KONTEN -->
+<div class="controls">
+  <div id="fs" class="ctrl"></div>
+  <div id="rewind" class="ctrl"></div>
+  <button id="playBtn" class="play-btn"></button>
+  <div id="forward" class="ctrl"></div>
+  <select id="speed">
+    <option value="1">1x</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+    <option value="2">2x</option>
+  </select>
+</div>
+
+<div class="actions">
+  <div>Share</div>
+  <div>Copy</div>
+  <div>Download</div>
+</div>
+
 <button id="openFull" class="full-btn">FULL KONTEN</button>
 
-<!-- TOMBOL BAWAH -->
-<div class="actions bottom-actions">
-  <button id="extraBtn" class="action">Lanjut</button>
-</div>
-
 </div>
 </div>
 
-<!-- POPUP -->
 <div id="popup" class="popup">
   <div class="popup-bg"></div>
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<footer>
-  © 2026 Videy
-</footer>
+<footer>Bahanmu</footer>
 
-<!-- ⚠️ SCRIPT ASLI LO — TIDAK DIUBAH -->
+<!-- ⚠️ SCRIPT ASLI LO – TIDAK DIUBAH -->
 <script>
 /* === SCRIPT LO TETAP SAMA === */
 </script>
