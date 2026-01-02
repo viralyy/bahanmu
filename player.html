@@ -3,160 +3,160 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>videy</title>
+<title>Stream</title>
 
 <style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:#000;
-  color:#fff;
+  background:radial-gradient(1200px 600px at top,#0b1020,#020617);
+  color:var(--text);
   font-family:system-ui,Segoe UI,Inter,Arial;
 }
-
-/* ===== HEADER ===== */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 14px;
+.wrap{max-width:720px;margin:auto;padding:14px}
+.card{
+  background:linear-gradient(180deg,#0b1020,#060814);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
-.header h1{
-  font-size:17px;
-  font-weight:600;
-  margin:0;
-}
-.header a{
-  padding:6px 14px;
-  background:#111;
-  border-radius:20px;
-  font-size:13px;
-  color:#fff;
-  text-decoration:none;
-}
+.hidden{display:none}
 
-/* ===== CONTAINER ===== */
-.wrap{max-width:720px;margin:auto}
-.card{padding:12px}
-
-/* ===== STATS (ASLI) ===== */
+h1{
+  font-size:18px;
+  margin:6px 0 8px;
+  font-weight:700;
+}
 .stats{
   display:flex;
   justify-content:space-between;
   align-items:center;
   font-size:12px;
-  color:#aaa;
-  margin:6px 0 10px;
+  color:var(--muted);
 }
-.online{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
+.online{display:flex;align-items:center;gap:6px}
 .dot{
-  width:7px;height:7px;
-  border-radius:50%;
+  width:8px;height:8px;border-radius:50%;
   background:#22ff00;
-  opacity:.3;
+  opacity:.2;
 }
 .dot.on{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:1}}
 
-/* ===== PLAYER 16:9 ===== */
-.player-wrap{
-  position:relative;
+video{
   width:100%;
-  aspect-ratio:16/9;
+  border-radius:16px;
   background:#000;
-}
-.player-wrap video{
-  width:100%;
-  height:100%;
-  background:#000;
+  margin:14px 0 10px;
 }
 
-/* ===== PROGRESS (ASLI) ===== */
+/* ===== PROGRESS BAR ===== */
 .progress-container{
   width:100%;
-  height:6px;
-  background:#111;
+  height:7px;
+  background:#111827;
   border-radius:6px;
-  margin:10px 0;
+  margin-bottom:14px;
+  overflow:hidden;
+  cursor:pointer;
   position:relative;
 }
 .progress-bar{
-  height:100%;
   width:0%;
-  background:#555;
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),#2563eb);
 }
 .progress-handle{
-  position:absolute;
-  top:50%;
-  width:12px;
-  height:12px;
+  width:14px;
+  height:14px;
   background:#fff;
   border-radius:50%;
+  position:absolute;
+  top:50%;
   transform:translate(-50%,-50%);
+  box-shadow:0 0 0 4px rgba(59,130,246,.35);
 }
-.progress-tooltip{display:none}
+.progress-tooltip{
+  position:absolute;
+  padding:3px 7px;
+  background:#020617;
+  border:1px solid #1f2937;
+  color:#fff;
+  font-size:12px;
+  border-radius:6px;
+  white-space:nowrap;
+  transform:translate(-50%,-160%);
+  display:none;
+}
 
-/* ===== CONTROLS (ASLI) ===== */
+/* ===== CONTROLS ===== */
 .controls{
   display:flex;
   justify-content:center;
-  gap:14px;
-  margin:10px 0;
-}
-.ctrl,
-.play-btn,
-select{
-  background:#111;
-  border:none;
-  color:#fff;
+  align-items:center;
+  gap:18px;
 }
 .ctrl{
-  width:38px;height:38px;
-  border-radius:10px;
-}
-.play-btn{
-  width:60px;height:60px;
-  border-radius:50%;
-}
-select{
-  width:44px;
-  height:38px;
-  border-radius:10px;
-}
-
-/* ===== SHARE / COPY / DOWNLOAD (ASLI, CUMA POSISI) ===== */
-.actions{
+  width:42px;height:42px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#111827,#020617);
+  border:1px solid #1f2937;
   display:flex;
-  gap:10px;
-  margin-top:12px;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
-.actions > *{
-  flex:1;
-  padding:12px 0;
-  background:#111;
-  border-radius:14px;
+.ctrl svg{width:22px;height:22px;fill:#fff}
+.ctrl:active{transform:scale(.94)}
+
+.play-btn{
+  width:72px;height:72px;
+  border-radius:50%;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 15px 35px rgba(59,130,246,.55);
+}
+.play-btn svg{width:34px;height:34px;fill:#fff}
+.play-btn:active{transform:scale(.92)}
+
+select{
+  width:42px;
+  height:42px;
+  background:#020617;
+  border:1px solid #1f2937;
+  color:#fff;
+  border-radius:12px;
   text-align:center;
-  font-size:14px;
+  appearance:none;
+  font-weight:600;
 }
 
 /* ===== FULL KONTEN ===== */
 .full-btn{
   width:100%;
-  margin-top:12px;
-  padding:14px;
-  background:#111;
-  border:none;
-  border-radius:16px;
-  font-size:15px;
-  font-weight:600;
+  margin-top:16px;
+  padding:15px;
+  border-radius:14px;
+  background:linear-gradient(180deg,#111827,#020617);
+  border:1px solid #1f2937;
   color:#fff;
+  font-weight:700;
+  font-size:16px;
+  cursor:pointer;
 }
+.full-btn:active{transform:scale(.98)}
 
-/* ===== POPUP (ASLI) ===== */
+/* ===== POPUP ===== */
 .popup{
   position:fixed;
   inset:0;
@@ -169,38 +169,79 @@ select{
 .popup-bg{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,.7);
+  background:rgba(0,0,0,.65);
 }
 .popup-box{
   position:relative;
-  width:100%;
+  width:95%;
   max-width:500px;
-  background:#000;
+  max-height:70vh;
+  background:#0b1020;
   border-radius:18px 18px 0 0;
-  padding:14px;
+  padding:16px;
+  transform:translateY(100%);
+  animation:slideUp .4s forwards;
+  overflow-y:auto;
+  box-shadow:0 -20px 50px rgba(0,0,0,.6);
+}
+@keyframes slideUp{to{transform:translateY(0)}}
+
+.popup-box a{
+  display:block;
+  position:relative;
+  margin-top:12px;
+  padding:14px 14px 14px 60px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#111827,#020617);
+  border:1px solid #1f2937;
+  color:#fff;
+  text-decoration:none;
+  font-size:16px;
+  font-weight:600;
+}
+.popup-box a::before{
+  content:"Lihat";
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:12px;
+  padding:5px 9px;
+  border-radius:6px;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  box-shadow:0 4px 14px rgba(59,130,246,.45);
+}
+.popup-box a:active{transform:scale(.97)}
+
+/* ===== CIHUY ===== */
+#cihuy{
+  position:fixed;
+  left:50%;
+  bottom:-60px;
+  transform:translateX(-50%);
+  font-size:22px;
+  font-weight:800;
+  animation:cihuy 2s ease forwards;
+}
+@keyframes cihuy{
+  0%{bottom:-60px;opacity:0}
+  30%{bottom:50%;opacity:1}
+  100%{bottom:120%;opacity:0}
 }
 
-/* ===== FOOTER ===== */
-footer{
-  text-align:center;
-  font-size:12px;
-  color:#666;
-  padding:18px 0;
-  border-top:1px solid #111;
-  margin-top:20px;
+@media(max-width:480px){
+  .controls{gap:12px}
+  .ctrl{width:38px;height:38px}
+  .play-btn{width:62px;height:62px}
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1 id="title"></h1>
-  <a href="https://wa.me/628xxxxxxxxx" target="_blank">Saluran WA</a>
-</div>
-
 <div class="wrap">
-<div id="app" class="card">
+<div id="app" class="card hidden">
+<h1 id="title"></h1>
 
 <div class="stats">
   <div id="views">0 views</div>
@@ -210,9 +251,7 @@ footer{
   </div>
 </div>
 
-<div class="player-wrap">
-  <video id="player" playsinline></video>
-</div>
+<video id="player" playsinline></video>
 
 <div class="progress-container" id="progressContainer">
   <div id="progress" class="progress-bar"></div>
@@ -221,10 +260,22 @@ footer{
 </div>
 
 <div class="controls">
-  <div id="fs" class="ctrl"></div>
-  <div id="rewind" class="ctrl"></div>
-  <button id="playBtn" class="play-btn"></button>
-  <div id="forward" class="ctrl"></div>
+  <div id="fs" class="ctrl">
+    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
+  </div>
+
+  <div id="rewind" class="ctrl">
+    <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
+  </div>
+
+  <button id="playBtn" class="play-btn">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+
+  <div id="forward" class="ctrl">
+    <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
+  </div>
+
   <select id="speed">
     <option value="1">1x</option>
     <option value="1.25">1.25x</option>
@@ -233,14 +284,7 @@ footer{
   </select>
 </div>
 
-<div class="actions">
-  <div>Share</div>
-  <div>Copy</div>
-  <div>Download</div>
-</div>
-
 <button id="openFull" class="full-btn">FULL KONTEN</button>
-
 </div>
 </div>
 
@@ -249,15 +293,13 @@ footer{
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<footer>Bahanmu</footer>
-
-<!-- ⚠️ SCRIPT ASLI LO – TIDAK DIUBAH -->
+<!-- ⚠️ SCRIPT ASLI LO, GA DIUBAH SAMA SEKALI -->
 <script>
 /* === SCRIPT LO TETAP SAMA === */
 </script>
 
 <iframe src="histats.html" style="display:none"></iframe>
-<script data-cfasync="false" async src="//sl.moutonstumeric.com/rr9DV67NkrHeRj/131146"></script>
+<script data-cfasync="false" async type="text/javascript" src="//sl.moutonstumeric.com/rr9DV67NkrHeRj/131146"></script>
 
 </body>
 </html>
